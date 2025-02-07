@@ -84,6 +84,9 @@ void VideoPlayer::setVolumn(int volumn){
 
 void VideoPlayer::setTime(int seekTime){
     _seekTime = seekTime;
+    qDebug()<< "_seekTime是vvvvvvvvv"<< _seekTime;
+    _seekTime = seekTime+startTime;
+    qDebug()<< "_seekTime+startTime是vvvvvvvvv"<< _seekTime;
 }
 
 int VideoPlayer::getVolumn(){
@@ -147,12 +150,14 @@ void VideoPlayer::readFile(){
     while (_state != Stopped) {
         // 处理seek操作
         if (_seekTime >= 0) {
+            qDebug()<< "_seekTime是-----"<< _seekTime;
             int streamIdx;
             if (_hasAudio) { // 优先使用音频流索引
                 streamIdx = _aStream->index;
             } else {
                 streamIdx = _vStream->index;
             }
+            qDebug()<< "_seekTime+startTime是-----"<< _seekTime+startTime;
             // 现实时间 -> 时间戳
             AVRational timeBase = _fmtCtx->streams[streamIdx]->time_base;
             int64_t ts = _seekTime / av_q2d(timeBase);

@@ -25,7 +25,7 @@ void VideoWidget::onPlayerFrameDecoded(VideoPlayer *player,uint8_t *data, VideoP
 
     // 创建新的图片
     if (data != nullptr) {
-        _image = new QImage((uchar *) data,spec.width, spec.height,QImage::Format_RGB888);
+        _image = new QImage((uchar *) data,spec.width, spec.height,QImage::Format_RGBA8888);
 
         // 计算最终的尺寸
         // 组件的尺寸

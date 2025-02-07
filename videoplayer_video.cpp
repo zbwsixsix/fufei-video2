@@ -23,13 +23,13 @@ int VideoPlayer::initSws(){
     // 输出frame的参数
     _vSwsOutSpec.width = inW >> 4 << 4;// 先除以16在乘以16，保证是16的倍数
     _vSwsOutSpec.height = inH >> 4 << 4;
-    _vSwsOutSpec.pixFmt = AV_PIX_FMT_RGB24;
+    _vSwsOutSpec.pixFmt = AV_PIX_FMT_RGBA;
     _vSwsOutSpec.size = av_image_get_buffer_size(_vSwsOutSpec.pixFmt,_vSwsOutSpec.width,_vSwsOutSpec.height, 1);
 
     // 初始化像素格式转换的上下文
     _vSwsCtx = sws_getContext(inW,inH,_vDecodeCtx->pix_fmt,
                               _vSwsOutSpec.width,_vSwsOutSpec.height,_vSwsOutSpec.pixFmt,
-                              SWS_BILINEAR, nullptr, nullptr, nullptr);
+                              SWS_BILINEAR| SWS_ACCURATE_RND , nullptr, nullptr, nullptr);
     if (!_vSwsCtx) {
         qDebug() << "sws_getContext error";
         return -1;

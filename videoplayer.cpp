@@ -150,19 +150,26 @@ void VideoPlayer::readFile(){
     while (_state != Stopped) {
         // 处理seek操作
         if (_seekTime >= 0) {
-            qDebug()<< "_seekTime是-----"<< _seekTime;
+            qDebug()<< "_seekTime是RRRRRRR"<< _seekTime;
             int streamIdx;
             if (_hasAudio) { // 优先使用音频流索引
                 streamIdx = _aStream->index;
             } else {
                 streamIdx = _vStream->index;
             }
-            qDebug()<< "_seekTime+startTime是-----"<< _seekTime+startTime;
+            qDebug()<< "_seekTime+startTime是RRRRRRR"<< _seekTime+startTime;
             // 现实时间 -> 时间戳
             AVRational timeBase = _fmtCtx->streams[streamIdx]->time_base;
             int64_t ts = _seekTime / av_q2d(timeBase);
-            //           ret = av_seek_frame(_fmtCtx, streamIdx, ts, AVSEEK_FLAG_BACKWARD|AVSEEK_FLAG_FRAME);
+
+            // int64_t ts =2064000;
+             qDebug() << "ts是多少" <<  ts;
+             qDebug() << "av_q2d(timeBase)是多少" <<  1/av_q2d(timeBase);
+            //ret = av_seek_frame(_fmtCtx, streamIdx, ts, AVSEEK_FLAG_BACKWARD|AVSEEK_FLAG_FRAME);
             ret = avformat_seek_file(_fmtCtx, streamIdx, INT64_MIN, ts, INT64_MAX, 0);
+
+            // 修改后的seek逻辑（确保启用FRAME和BACKWARD标志）
+            // ret = avformat_seek_file(_fmtCtx, streamIdx, ts - 1000, ts, ts + 1000, AVSEEK_FLAG_BACKWARD | AVSEEK_FLAG_FRAME);
 
             if(ret < 0){// seek失败
                 qDebug() << "seek失败" << _seekTime << ts << streamIdx;
@@ -172,6 +179,8 @@ void VideoPlayer::readFile(){
                 // 清空之前读取的数据包
                 clearAudioPktList();
                 clearVideoPktList();
+                // if (_hasVideo) avcodec_flush_buffers(_vDecodeCtx);
+                // if (_hasAudio) avcodec_flush_buffers(_aDecodeCtx);
                 _vSeekTime = _seekTime;
                 _aSeekTime = _seekTime;
                 _seekTime = -1;
@@ -254,6 +263,24 @@ int VideoPlayer::initDecoder(AVCodecContext **decodeCtx,AVStream **stream,AVMedi
     // 打开解码器
     ret = avcodec_open2(*decodeCtx, decoder, nullptr);
     RET(avcodec_open2);
+
+    // 在avcodec_open2之后添加
+
+    // if (&decodeCtx->hw_device_ctx == nullptr) {
+    //     av_hwdevice_ctx_create(&decodeCtx->hw_device_ctx,
+    //                            AV_HWDEVICE_TYPE_DXVA2,  // Windows
+    //                            nullptr, nullptr, 0);
+    // }
+    // // 设置硬件像素格式偏好
+    // decodeCtx->get_format = [](AVCodecContext* ctx, const enum AVPixelFormat* fmts){
+    //     (void)ctx;
+    //     const AVPixelFormat *p;
+    //     for (p = fmts; *p != AV_PIX_FMT_NONE; p++) {
+    //         if (*p == AV_PIX_FMT_D3D11 || *p == AV_PIX_FMT_CUDA)
+    //             return *p;
+    //     }
+    //     return fmts[0];
+    // };
     return 0;
 }
 

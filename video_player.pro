@@ -48,6 +48,13 @@ msvc {
 win32{
     FFMPEG_DIR = $$PWD/sdk/ffmpeg
     SDL_DIR = $$PWD/sdk/SDL2
+
+# LIBS += -LD:/ffmpeg/lib/ -lavcodec -lavutil -lswscale -lavfilter
+#    INCLUDEPATH += D:/ffmpeg/include/
+
+#    # 添加硬件加速支持库
+#    LIBS += -LD:/ffmpeg/lib/ -lcuda -lcudart -lnppc -lnppicc
+#    LIBS += -ld3d11 -ldxgi -ldxguid
 }
 
 INCLUDEPATH += $${FFMPEG_DIR}/include

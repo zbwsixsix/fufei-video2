@@ -219,7 +219,7 @@ int VideoPlayer::decodeAudio(double startTime){
     if (pkt.pts != AV_NOPTS_VALUE) {
         _aTime = av_q2d(_aStream->time_base) *pkt.pts;
         // qDebug() << "_aTime" << _vTime <<"AAAstartTime" << startTime ;
-        _aTime=_aTime-startTime;
+         _aTime=_aTime-startTime;
 
         // 通知外界：播放时间点发生了改变
         emit timeChanged(this);
@@ -228,6 +228,8 @@ int VideoPlayer::decodeAudio(double startTime){
     // 如果是视频，不能在这个位置判断（不能提前释放pkt，不然会导致B帧、P帧解码失败，画面撕裂）
     // 发现音频的时间是早于seekTime的，直接丢弃
     if (_aSeekTime >= 0) {
+        _aSeekTime=_aSeekTime-startTime;
+        qDebug() << "_aTime是" << _aTime<<"_aSeekTime"<<_aSeekTime;
         if (_aTime < _aSeekTime) {
             // 释放pkt
             av_packet_unref(&pkt);

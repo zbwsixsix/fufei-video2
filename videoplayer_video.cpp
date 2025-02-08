@@ -35,13 +35,22 @@ int VideoPlayer::initSws(){
     _vSwsCtx = sws_getContext(
         inW, inH, _vDecodeCtx->pix_fmt,
         _vSwsOutSpec.width, _vSwsOutSpec.height, AV_PIX_FMT_RGBA,
-        SWS_BILINEAR,
+        SWS_BILINEAR| SWS_ACCURATE_RND,
         nullptr, nullptr, nullptr
         );
     if (!_vSwsCtx) {
         qDebug() << "sws_getContext error";
         return -1;
     }
+
+    sws_setColorspaceDetails(_vSwsCtx,
+                             sws_getCoefficients(SWS_CS_DEFAULT), // 输入色彩空间
+                             0, // 输入范围 (0-255)
+                             sws_getCoefficients(SWS_CS_ITU709), // 输出色彩空间
+                             1, // 输出范围 (JPEG范围)
+                             0, 1 << 16, 1 << 16
+                             );
+
 
     // 初始化像素格式转换的输入frame
     _vSwsInFrame = av_frame_alloc();
@@ -87,6 +96,11 @@ void VideoPlayer::clearVideoPktList(){
 
 void VideoPlayer::freeVideo(){
     clearVideoPktList();
+    // 在 clearVideoPktList() 后刷新解码器
+    if (_hasVideo) {
+        avcodec_flush_buffers(_vDecodeCtx);
+    }
+
     avcodec_free_context(&_vDecodeCtx);
     av_frame_free(&_vSwsInFrame);
     if (_vSwsOutFrame) {
@@ -102,6 +116,14 @@ void VideoPlayer::freeVideo(){
 }
 
 void VideoPlayer::decodeVideo( double startTime){
+    // 处理参考帧丢失的容错机制
+    if (_vDecodeCtx->codec_id == AV_CODEC_ID_HEVC) {
+        _vDecodeCtx->skip_frame = AVDISCARD_NONREF; // 跳过非参考帧
+        _vDecodeCtx->err_recognition |= AV_EF_EXPLODE; // 严格错误检测
+    }
+
+
+
     while (true) {
         // 如果是暂停，并且没有Seek操作
         if (_state == Paused && _vSeekTime == -1) {
@@ -149,8 +171,8 @@ void VideoPlayer::decodeVideo( double startTime){
             // 一定要在解码成功后，再进行下面的判断
             // 发现视频的时间是早于seekTime的，直接丢弃
             if(_vSeekTime >= 0){
-                if (_hasVideo) avcodec_flush_buffers(_vDecodeCtx);
-                if (_hasAudio) avcodec_flush_buffers(_aDecodeCtx);
+                // if (_hasVideo) avcodec_flush_buffers(_vDecodeCtx);
+                // if (_hasAudio) avcodec_flush_buffers(_aDecodeCtx);
                 _vSeekTime=_vSeekTime-startTime;
                 qDebug() << "_vTime是" << _vTime<<"_vSeekTime"<<_vSeekTime;
                 if (_vTime < _vSeekTime) {
@@ -177,7 +199,7 @@ void VideoPlayer::decodeVideo( double startTime){
             memcpy(data, _vSwsOutFrame->data[0], _vSwsOutSpec.size);
             // 发出信号
             emit frameDecoded(this,data,_vSwsOutSpec);
-            qDebug()<< "渲染了一帧"<< _vTime << _aTime;
+            // qDebug()<< "渲染了一帧"<< _vTime << _aTime;
         }
     }
 }

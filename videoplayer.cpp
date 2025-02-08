@@ -166,7 +166,7 @@ void VideoPlayer::readFile(){
              qDebug() << "ts是多少" <<  ts;
              qDebug() << "av_q2d(timeBase)是多少" <<  1/av_q2d(timeBase);
             //ret = av_seek_frame(_fmtCtx, streamIdx, ts, AVSEEK_FLAG_BACKWARD|AVSEEK_FLAG_FRAME);
-            ret = avformat_seek_file(_fmtCtx, streamIdx, INT64_MIN, ts, INT64_MAX, 0);
+            ret = avformat_seek_file(_fmtCtx, streamIdx, INT64_MIN, ts, INT64_MAX, AVSEEK_FLAG_BACKWARD);
 
             // 修改后的seek逻辑（确保启用FRAME和BACKWARD标志）
             // ret = avformat_seek_file(_fmtCtx, streamIdx, ts - 1000, ts, ts + 1000, AVSEEK_FLAG_BACKWARD | AVSEEK_FLAG_FRAME);

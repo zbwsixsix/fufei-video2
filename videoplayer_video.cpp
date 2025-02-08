@@ -149,6 +149,8 @@ void VideoPlayer::decodeVideo( double startTime){
             // 一定要在解码成功后，再进行下面的判断
             // 发现视频的时间是早于seekTime的，直接丢弃
             if(_vSeekTime >= 0){
+                if (_hasVideo) avcodec_flush_buffers(_vDecodeCtx);
+                if (_hasAudio) avcodec_flush_buffers(_aDecodeCtx);
                 _vSeekTime=_vSeekTime-startTime;
                 qDebug() << "_vTime是" << _vTime<<"_vSeekTime"<<_vSeekTime;
                 if (_vTime < _vSeekTime) {

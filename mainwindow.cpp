@@ -49,7 +49,7 @@ void MainWindow::onPlayerTimeChanged(VideoPlayer *player) {
 
 void MainWindow::onPlayerInitFinished(VideoPlayer *player) {
     int duration = player->getDuration();
-    qDebug()<< duration;
+    qDebug()<< "duration是多少"<<duration;
     // 设置一些slider的范围
     ui->currentSlider->setRange(0,duration);
     // 设置label的文字

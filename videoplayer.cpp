@@ -87,6 +87,7 @@ void VideoPlayer::setTime(int seekTime){
     qDebug()<< "_seekTime是vvvvvvvvv"<< _seekTime;
     _seekTime = seekTime+startTime;
     qDebug()<< "_seekTime+startTime是vvvvvvvvv"<< _seekTime;
+    // _seekTime =73714;
 }
 
 int VideoPlayer::getVolumn(){

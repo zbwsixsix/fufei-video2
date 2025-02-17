@@ -26,13 +26,20 @@ int VideoPlayer::initSwr() {
     _aSwrInSpec.sampleFmt = _aDecodeCtx->sample_fmt;
     _aSwrInSpec.sampleRate = _aDecodeCtx->sample_rate;
     _aSwrInSpec.chLayout = _aDecodeCtx->channel_layout;
-    _aSwrInSpec.chs = _aDecodeCtx->channels;
+    _aSwrInSpec.chs = _aDecodeCtx->ch_layout.nb_channels;
 
     // 重采样输出参数
     _aSwrOutSpec.sampleFmt = AV_SAMPLE_FMT_S16;
     _aSwrOutSpec.sampleRate = 44100;
     _aSwrOutSpec.chLayout = AV_CH_LAYOUT_STEREO;
-    _aSwrOutSpec.chs = av_get_channel_layout_nb_channels(_aSwrOutSpec.chLayout);
+    AVChannelLayout ch_layout;
+
+
+    av_channel_layout_from_mask(&ch_layout, _aSwrOutSpec.chLayout);
+    uint64_t channel_layout_mask = ch_layout.u.mask; // 假设 ch_layout 是 AVChannelLayout* 类型
+    _aSwrOutSpec.chs = av_get_channel_layout_nb_channels(channel_layout_mask);
+
+    // _aSwrOutSpec.chs = av_get_channel_layout_nb_channels(_aSwrOutSpec.chLayout);
     _aSwrOutSpec.bytesPerSampleFrame = _aSwrOutSpec.chs * av_get_bytes_per_sample(_aSwrOutSpec.sampleFmt);
 
     // 创建重采样上下文
@@ -83,7 +90,7 @@ void VideoPlayer::freeAudio(){
     _aSwrOutIdx = 0;
     _aSwrOutSize =0;
      _aTime = 0;
-     _aCanFree = false;
+     _aCanFree = true;
      _aSeekTime = -1;
 
     clearAudioPktList();

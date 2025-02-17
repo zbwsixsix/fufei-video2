@@ -1,10 +1,12 @@
-﻿#include "mainwindow.h"
+﻿#include "playerwindow.h"
 
 #include <QApplication>
 
 #ifdef _WIN32
 #include <windows.h>
+#ifdef _MSC_VER
 #pragma comment(lib, "user32.lib")
+#endif
 #undef main /* We don't want SDL to override our main() */
 #endif
 
@@ -24,7 +26,7 @@ int main(int argc, char *argv[])
 // #endif
 
     QApplication a(argc, argv);
-    MainWindow w;
+    PlayerWindow w;
     w.show();
     return a.exec();
 }

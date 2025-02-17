@@ -1,13 +1,13 @@
 /********************************************************************************
-** Form generated from reading UI file 'mainwindow.ui'
+** Form generated from reading UI file 'playerwindow.ui'
 **
 ** Created by: Qt User Interface Compiler version 6.7.3
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
 ********************************************************************************/
 
-#ifndef UI_MAINWINDOW_H
-#define UI_MAINWINDOW_H
+#ifndef UI_PLAYERWINDOW_H
+#define UI_PLAYERWINDOW_H
 
 #include <QtCore/QVariant>
 #include <QtWidgets/QApplication>
@@ -26,7 +26,7 @@
 
 QT_BEGIN_NAMESPACE
 
-class Ui_MainWindow
+class Ui_PlayerWindow
 {
 public:
     QWidget *centralwidget;
@@ -42,8 +42,8 @@ public:
     QHBoxLayout *horizontalLayout_2;
     QPushButton *playBtn;
     QPushButton *stopBtn;
-    QPushButton *pushButton_2;
-    QPushButton *pushButton;
+    QPushButton *fastBackwardBtn;
+    QPushButton *fastForwardBtn;
     QHBoxLayout *horizontalLayout_3;
     VideoSlider *currentSlider;
     QLabel *currentLabel;
@@ -56,12 +56,12 @@ public:
     QMenuBar *menubar;
     QStatusBar *statusbar;
 
-    void setupUi(QMainWindow *MainWindow)
+    void setupUi(QMainWindow *PlayerWindow)
     {
-        if (MainWindow->objectName().isEmpty())
-            MainWindow->setObjectName("MainWindow");
-        MainWindow->resize(822, 658);
-        centralwidget = new QWidget(MainWindow);
+        if (PlayerWindow->objectName().isEmpty())
+            PlayerWindow->setObjectName("PlayerWindow");
+        PlayerWindow->resize(922, 658);
+        centralwidget = new QWidget(PlayerWindow);
         centralwidget->setObjectName("centralwidget");
         verticalLayout = new QVBoxLayout(centralwidget);
         verticalLayout->setObjectName("verticalLayout");
@@ -111,15 +111,15 @@ public:
 
         horizontalLayout_2->addWidget(stopBtn);
 
-        pushButton_2 = new QPushButton(centralwidget);
-        pushButton_2->setObjectName("pushButton_2");
+        fastBackwardBtn = new QPushButton(centralwidget);
+        fastBackwardBtn->setObjectName("fastBackwardBtn");
 
-        horizontalLayout_2->addWidget(pushButton_2);
+        horizontalLayout_2->addWidget(fastBackwardBtn);
 
-        pushButton = new QPushButton(centralwidget);
-        pushButton->setObjectName("pushButton");
+        fastForwardBtn = new QPushButton(centralwidget);
+        fastForwardBtn->setObjectName("fastForwardBtn");
 
-        horizontalLayout_2->addWidget(pushButton);
+        horizontalLayout_2->addWidget(fastForwardBtn);
 
         horizontalLayout_3 = new QHBoxLayout();
         horizontalLayout_3->setObjectName("horizontalLayout_3");
@@ -198,44 +198,44 @@ public:
 
         verticalLayout->addLayout(horizontalLayout);
 
-        MainWindow->setCentralWidget(centralwidget);
-        menubar = new QMenuBar(MainWindow);
+        PlayerWindow->setCentralWidget(centralwidget);
+        menubar = new QMenuBar(PlayerWindow);
         menubar->setObjectName("menubar");
-        menubar->setGeometry(QRect(0, 0, 822, 25));
-        MainWindow->setMenuBar(menubar);
-        statusbar = new QStatusBar(MainWindow);
+        menubar->setGeometry(QRect(0, 0, 922, 25));
+        PlayerWindow->setMenuBar(menubar);
+        statusbar = new QStatusBar(PlayerWindow);
         statusbar->setObjectName("statusbar");
-        MainWindow->setStatusBar(statusbar);
+        PlayerWindow->setStatusBar(statusbar);
 
-        retranslateUi(MainWindow);
+        retranslateUi(PlayerWindow);
 
         playWidget->setCurrentIndex(0);
 
 
-        QMetaObject::connectSlotsByName(MainWindow);
+        QMetaObject::connectSlotsByName(PlayerWindow);
     } // setupUi
 
-    void retranslateUi(QMainWindow *MainWindow)
+    void retranslateUi(QMainWindow *PlayerWindow)
     {
-        MainWindow->setWindowTitle(QCoreApplication::translate("MainWindow", "MainWindow", nullptr));
-        openFileBtn->setText(QCoreApplication::translate("MainWindow", "\346\211\223\345\274\200\346\226\207\344\273\266", nullptr));
-        playBtn->setText(QCoreApplication::translate("MainWindow", "\346\222\255\346\224\276", nullptr));
-        stopBtn->setText(QCoreApplication::translate("MainWindow", "\345\201\234\346\255\242", nullptr));
-        pushButton_2->setText(QCoreApplication::translate("MainWindow", "\345\277\253\351\200\200\345\210\26030s", nullptr));
-        pushButton->setText(QCoreApplication::translate("MainWindow", "\350\267\263\345\210\26060s", nullptr));
-        currentLabel->setText(QCoreApplication::translate("MainWindow", "00:00:00", nullptr));
-        label_2->setText(QCoreApplication::translate("MainWindow", "/", nullptr));
-        durationLabel->setText(QCoreApplication::translate("MainWindow", "00:00:00", nullptr));
-        muteBtn->setText(QCoreApplication::translate("MainWindow", "\351\235\231\351\237\263", nullptr));
-        volumnLabel->setText(QCoreApplication::translate("MainWindow", "100", nullptr));
+        PlayerWindow->setWindowTitle(QCoreApplication::translate("PlayerWindow", "MainWindow", nullptr));
+        openFileBtn->setText(QCoreApplication::translate("PlayerWindow", "\346\211\223\345\274\200\346\226\207\344\273\266", nullptr));
+        playBtn->setText(QCoreApplication::translate("PlayerWindow", "\346\222\255\346\224\276", nullptr));
+        stopBtn->setText(QCoreApplication::translate("PlayerWindow", "\345\201\234\346\255\242", nullptr));
+        fastBackwardBtn->setText(QCoreApplication::translate("PlayerWindow", "\345\277\253\351\200\20015s", nullptr));
+        fastForwardBtn->setText(QCoreApplication::translate("PlayerWindow", "\345\277\253\350\277\23320s", nullptr));
+        currentLabel->setText(QCoreApplication::translate("PlayerWindow", "00:00:00", nullptr));
+        label_2->setText(QCoreApplication::translate("PlayerWindow", "/", nullptr));
+        durationLabel->setText(QCoreApplication::translate("PlayerWindow", "00:00:00", nullptr));
+        muteBtn->setText(QCoreApplication::translate("PlayerWindow", "\351\235\231\351\237\263", nullptr));
+        volumnLabel->setText(QCoreApplication::translate("PlayerWindow", "100", nullptr));
     } // retranslateUi
 
 };
 
 namespace Ui {
-    class MainWindow: public Ui_MainWindow {};
+    class PlayerWindow: public Ui_PlayerWindow {};
 } // namespace Ui
 
 QT_END_NAMESPACE
 
-#endif // UI_MAINWINDOW_H
+#endif // UI_PLAYERWINDOW_H

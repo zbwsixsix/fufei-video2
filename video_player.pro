@@ -18,7 +18,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
     condmutex.cpp \
     main.cpp \
-    mainwindow.cpp \
+    playerwindow.cpp \
     videoplayer.cpp \
     videoplayer_audio.cpp \
     videoplayer_video.cpp \
@@ -27,13 +27,13 @@ SOURCES += \
 
 HEADERS += \
     condmutex.h \
-    mainwindow.h \
+    playerwindow.h \
     videoplayer.h \
     videoslider.h \
     videowidget.h
 
 FORMS += \
-    mainwindow.ui
+    playerwindow.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

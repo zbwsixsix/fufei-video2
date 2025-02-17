@@ -7,22 +7,22 @@
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
-    class MainWindow;
+    class PlayerWindow;
 }
 QT_END_NAMESPACE
 
-class MainWindow : public QMainWindow {
+class PlayerWindow : public QMainWindow {
     Q_OBJECT
 
 public:
-    MainWindow(QWidget *parent = nullptr);
-    ~MainWindow();
+    PlayerWindow(QWidget *parent = nullptr);
+    ~PlayerWindow();
 
 private slots:
     void onPlayerStateChanged(VideoPlayer *player);
     void onPlayerTimeChanged(VideoPlayer *player);
     void onPlayerInitFinished(VideoPlayer *player);
-    void onPlayerPlayFailed(VideoPlayer *player);
+    void onPlayerPlayFailed();
     void onSliderClicked(VideoSlider *slider);
 
     void on_stopBtn_clicked();
@@ -37,8 +37,12 @@ private slots:
 
     void on_muteBtn_clicked();
 
+    void on_fastBackwardBtn_clicked();
+
+    void on_fastForwardBtn_clicked();
+
 private:
-    Ui::MainWindow *ui;
+    Ui::PlayerWindow *ui;
     VideoPlayer *_player;
 
     QString getTimeText(int value);

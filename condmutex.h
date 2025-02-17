@@ -1,6 +1,6 @@
 #ifndef CONDMUTEX_H
 #define CONDMUTEX_H
-
+#define SDL_MAIN_HANDLED
 #include "SDL.h"
 
 class CondMutex {

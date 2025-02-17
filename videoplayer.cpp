@@ -83,10 +83,27 @@ void VideoPlayer::setVolumn(int volumn){
 }
 
 void VideoPlayer::setTime(int seekTime){
+    if (_state == Playing) {
+        pause();
+    }
+
+
     _seekTime = seekTime;
     qDebug()<< "_seekTime是vvvvvvvvv"<< _seekTime;
     _seekTime = seekTime+startTime;
     qDebug()<< "_seekTime+startTime是vvvvvvvvv"<< _seekTime;
+
+    // 重新初始化视频信息
+    int ret = initVideoInfo();
+    if (ret < 0) {
+        fataError();
+        return;
+    }
+
+    // 重新开始播放
+    if (_state == Paused) {
+        play();
+    }
     // _seekTime =73714;
 }
 
@@ -158,19 +175,24 @@ void VideoPlayer::readFile(){
             } else {
                 streamIdx = _vStream->index;
             }
+            qDebug()<< "startTime是RRRRRRR"<< startTime;
             qDebug()<< "_seekTime+startTime是RRRRRRR"<< _seekTime+startTime;
+             qDebug() << "streamIdx"<<streamIdx;
             // 现实时间 -> 时间戳
             AVRational timeBase = _fmtCtx->streams[streamIdx]->time_base;
+
+             qDebug() << "av_q2d(timeBase)是多少" << av_q2d(timeBase);
             int64_t ts = _seekTime / av_q2d(timeBase);
 
+             // int64_t ts = av_rescale_q(_seekTime, AV_TIME_BASE_Q, _fmtCtx->streams[0]->time_base)*10000;
+            qDebug()<< "_seekTime是TTTTTT"<< _seekTime;
             // int64_t ts =2064000;
-             qDebug() << "ts是多少" <<  ts;
-             qDebug() << "av_q2d(timeBase)是多少" <<  1/av_q2d(timeBase);
-            //ret = av_seek_frame(_fmtCtx, streamIdx, ts, AVSEEK_FLAG_BACKWARD|AVSEEK_FLAG_FRAME);
+             qDebug() << "ts是多少" <<  ts<<"streamIdx"<<streamIdx;
+            // ret = av_seek_frame(_fmtCtx, streamIdx, ts, AVSEEK_FLAG_BACKWARD|AVSEEK_FLAG_FRAME);
             // ret = avformat_seek_file(_fmtCtx, streamIdx, INT64_MIN, ts, INT64_MAX, AVSEEK_FLAG_BACKWARD);
 
             // 修改后的seek逻辑（确保启用FRAME和BACKWARD标志）
-            ret = avformat_seek_file(_fmtCtx, streamIdx, INT64_MIN, ts, INT64_MAX, AVSEEK_FLAG_BACKWARD );
+            ret = avformat_seek_file(_fmtCtx,streamIdx , INT64_MIN, ts, INT64_MAX, AVSEEK_FLAG_FRAME );
 
             if(ret < 0){// seek失败
                 qDebug() << "seek失败" << _seekTime << ts << streamIdx;
@@ -191,6 +213,8 @@ void VideoPlayer::readFile(){
                 _aTime = 0;
                 _vTime = 0;
             }
+            // if (_hasVideo) avcodec_flush_buffers(_vDecodeCtx);
+            // if (_hasAudio) avcodec_flush_buffers(_aDecodeCtx);
         }
 
         int vSize = _vPktList.size();

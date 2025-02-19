@@ -101,7 +101,7 @@ private:
     typedef struct {
         int sampleRate;
         AVSampleFormat sampleFmt;
-        int chLayout;
+        AVChannelLayout chLayout;
         int chs;
         int bytesPerSampleFrame;
     } AudioSwrSpec;

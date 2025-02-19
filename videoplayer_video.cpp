@@ -199,7 +199,7 @@ void VideoPlayer::decodeVideo( double startTime){
             memcpy(data, _vSwsOutFrame->data[0], _vSwsOutSpec.size);
             // 发出信号
             emit frameDecoded(this,data,_vSwsOutSpec);
-            qDebug()<< "渲染了一帧"<< _vTime << _aTime;
+            // qDebug()<< "渲染了一帧"<< _vTime << _aTime;
         }
     }
 }

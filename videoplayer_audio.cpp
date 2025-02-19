@@ -1,9 +1,15 @@
 ﻿#include "videoplayer.h"
-
 // 初始化音频信息
 int VideoPlayer::initAudioInfo() {
     int ret = initDecoder(&_aDecodeCtx,&_aStream,AVMEDIA_TYPE_AUDIO);
     RET(initDecoder);
+
+    // 打印音频流参数以确认
+    qDebug() << "Audio sample rate:" << _aDecodeCtx->sample_rate;
+    qDebug() << "Audio sample format:" << _aDecodeCtx->sample_fmt;
+    qDebug() << "Audio channel layout:" << _aDecodeCtx->ch_layout.u.mask;
+    qDebug() << "Audio channels:" << _aDecodeCtx->ch_layout.nb_channels;
+
 
     // 初始化音频重采样
     ret = initSwr();
@@ -22,44 +28,62 @@ int VideoPlayer::initAudioInfo() {
 }
 
 int VideoPlayer::initSwr() {
+
+    qDebug() << "Audio sample rate:" << _aDecodeCtx->sample_rate;
+    qDebug() << "Audio sample format:" << _aDecodeCtx->sample_fmt;
+    qDebug() << "Audio channel layout:" << _aDecodeCtx->ch_layout.u.mask;
+    qDebug() << "Audio channels:" << _aDecodeCtx->ch_layout.nb_channels;
+
     // 重采样输入参数
     _aSwrInSpec.sampleFmt = _aDecodeCtx->sample_fmt;
     _aSwrInSpec.sampleRate = _aDecodeCtx->sample_rate;
-    _aSwrInSpec.chLayout = _aDecodeCtx->channel_layout;
+        // _aSwrInSpec.chLayout = _aDecodeCtx->ch_layout;
+    av_channel_layout_copy(&_aSwrInSpec.chLayout, &_aDecodeCtx->ch_layout);  //
     _aSwrInSpec.chs = _aDecodeCtx->ch_layout.nb_channels;
 
     // 重采样输出参数
     _aSwrOutSpec.sampleFmt = AV_SAMPLE_FMT_S16;
-    _aSwrOutSpec.sampleRate = 44100;
-    _aSwrOutSpec.chLayout = AV_CH_LAYOUT_STEREO;
-    AVChannelLayout ch_layout;
+    _aSwrOutSpec.sampleRate = _aDecodeCtx->sample_rate;;
+    av_channel_layout_copy(&_aSwrOutSpec.chLayout, &_aDecodeCtx->ch_layout);
 
-
-    av_channel_layout_from_mask(&ch_layout, _aSwrOutSpec.chLayout);
-    uint64_t channel_layout_mask = ch_layout.u.mask; // 假设 ch_layout 是 AVChannelLayout* 类型
-    _aSwrOutSpec.chs = av_get_channel_layout_nb_channels(channel_layout_mask);
-
-    // _aSwrOutSpec.chs = av_get_channel_layout_nb_channels(_aSwrOutSpec.chLayout);
+    _aSwrOutSpec.chs = _aDecodeCtx->ch_layout.nb_channels;  // 显式设置立体声
     _aSwrOutSpec.bytesPerSampleFrame = _aSwrOutSpec.chs * av_get_bytes_per_sample(_aSwrOutSpec.sampleFmt);
 
-    // 创建重采样上下文
-    _aSwrCtx = swr_alloc_set_opts(nullptr,
-                                  // 输出参数
-                                  _aSwrOutSpec.chLayout,
-                                  _aSwrOutSpec.sampleFmt,
-                                  _aSwrOutSpec.sampleRate,
-                                  // 输入参数
-                                  _aSwrInSpec.chLayout,
-                                  _aSwrInSpec.sampleFmt,
-                                  _aSwrInSpec.sampleRate,
-                                  0, nullptr);
-    if (!_aSwrCtx) {
-        qDebug() << "swr_alloc_set_opts error";
+    // 验证声道布局
+    char buf[64];
+    av_channel_layout_describe(&_aSwrInSpec.chLayout, buf, sizeof(buf));
+    qDebug() << "Input layout:" << buf;
+    av_channel_layout_describe(&_aSwrOutSpec.chLayout, buf, sizeof(buf));
+    qDebug() << "Output layout:" << buf;
+
+    // _aSwrOutSpec.chs = _aSwrOutSpec.chLayout.nb_channels;
+    // _aSwrOutSpec.bytesPerSampleFrame = _aSwrOutSpec.chs * av_get_bytes_per_sample(_aSwrOutSpec.sampleFmt);
+
+    // // 创建重采样上下文
+    // _aSwrCtx = swr_alloc();
+    // if (!_aSwrCtx) {
+    //     qDebug() << "swr_alloc error";
+    //     return -1;
+    // }
+
+
+    int ret = swr_alloc_set_opts2(
+        &_aSwrCtx,
+        &_aSwrOutSpec.chLayout,
+        _aSwrOutSpec.sampleFmt,
+        _aSwrOutSpec.sampleRate,
+        &_aSwrInSpec.chLayout,
+        _aSwrInSpec.sampleFmt,
+        _aSwrInSpec.sampleRate,
+        0, nullptr
+        );
+    if (ret < 0 || !_aSwrCtx) {
+        qDebug() << "swr_alloc_set_opts2 failed";
         return -1;
     }
 
     // 初始化重采样上下文
-    int ret = swr_init(_aSwrCtx);
+     ret = swr_init(_aSwrCtx);
     RET(swr_init);
 
     // 初始化重采样的输入frame
@@ -78,7 +102,7 @@ int VideoPlayer::initSwr() {
 
     // 初始化重采样的输出frame的data[0]空间
     ret = av_samples_alloc(_aSwrOutFrame->data,
-                           _aSwrOutFrame->linesize,
+                           &_aSwrOutFrame->linesize[0],
                            _aSwrOutSpec.chs,
                            4096, _aSwrOutSpec.sampleFmt, 1);
     RET(av_samples_alloc);
@@ -89,9 +113,9 @@ int VideoPlayer::initSwr() {
 void VideoPlayer::freeAudio(){
     _aSwrOutIdx = 0;
     _aSwrOutSize =0;
-     _aTime = 0;
-     _aCanFree = true;
-     _aSeekTime = -1;
+    _aTime = 0;
+    _aCanFree = true;
+    _aSeekTime = -1;
 
     clearAudioPktList();
     avcodec_free_context(&_aDecodeCtx);
@@ -226,7 +250,7 @@ int VideoPlayer::decodeAudio(double startTime){
     if (pkt.pts != AV_NOPTS_VALUE) {
         _aTime = av_q2d(_aStream->time_base) *pkt.pts;
         // qDebug() << "_aTime" << _vTime <<"AAAstartTime" << startTime ;
-         _aTime=_aTime-startTime;
+        _aTime=_aTime-startTime;
 
         // 通知外界：播放时间点发生了改变
         emit timeChanged(this);

@@ -83,10 +83,15 @@ void VideoPlayer::setVolumn(int volumn){
 }
 
 void VideoPlayer::setTime(int seekTime){
-    if (_state == Playing) {
-        pause();
-    }
+    // if (_state == Playing) {
+    //     pause();
+    // }
 
+    // 清空视频包列表
+    // clearVideoPktList();
+
+    // 清空音频包列表
+    // clearAudioPktList();
 
     _seekTime = seekTime;
     qDebug()<< "_seekTime是vvvvvvvvv"<< _seekTime;
@@ -94,16 +99,22 @@ void VideoPlayer::setTime(int seekTime){
     qDebug()<< "_seekTime+startTime是vvvvvvvvv"<< _seekTime;
 
     // 重新初始化视频信息
-    int ret = initVideoInfo();
-    if (ret < 0) {
-        fataError();
-        return;
-    }
+    // 进行seek操作
+    // if (_fmtCtx) {
+    //     int ret = av_seek_frame(_fmtCtx, -1, seekTime * AV_TIME_BASE, AVSEEK_FLAG_BACKWARD);
+    //     if (ret < 0) {
+    //         ERROR_BUF;
+    //         qDebug() << "av_seek_frame error" << errbuf;
+    //     }
+    // }
 
-    // 重新开始播放
-    if (_state == Paused) {
-        play();
-    }
+    // // 重新初始化视频信息
+    // initVideoInfo();
+
+    // 如果之前是播放状态，继续播放
+    // if (_state == Paused) {
+    //     play();
+    // }
     // _seekTime =73714;
 }
 

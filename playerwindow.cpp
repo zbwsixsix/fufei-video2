@@ -101,7 +101,7 @@ void PlayerWindow::on_openFileBtn_clicked() {
     QString filename = QFileDialog::getOpenFileName(nullptr,
                        "选择多媒体文件",
                        FILEPATH,
-                       "多媒体文件 (*.mp4 *.avi *.mkv *.mp3 *.aac)");
+                       "多媒体文件 (*.mp4 *.avi *.mkv *.mp3 *.aac )");
     qDebug() << "打开文件" << filename;
     if (filename.isEmpty()) return;
 

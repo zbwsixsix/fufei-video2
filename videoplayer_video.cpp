@@ -24,7 +24,7 @@ int VideoPlayer::initSws(){
     _vSwsOutSpec.width = inW >> 4 << 4;// 先除以16在乘以16，保证是16的倍数
     _vSwsOutSpec.height = inH >> 4 << 4;
     // _vSwsOutSpec.pixFmt = AV_PIX_FMT_RGB24;
-     _vSwsOutSpec.pixFmt = AV_PIX_FMT_RGBA;
+    _vSwsOutSpec.pixFmt = AV_PIX_FMT_RGBA;
     _vSwsOutSpec.size = av_image_get_buffer_size(_vSwsOutSpec.pixFmt,_vSwsOutSpec.width,_vSwsOutSpec.height, 1);
 
     // 初始化像素格式转换的上下文
@@ -116,6 +116,7 @@ void VideoPlayer::freeVideo(){
 }
 
 void VideoPlayer::decodeVideo( double startTime){
+
     // 处理参考帧丢失的容错机制
     if (_vDecodeCtx->codec_id == AV_CODEC_ID_HEVC) {
         _vDecodeCtx->skip_frame = AVDISCARD_NONREF; // 跳过非参考帧
@@ -153,7 +154,7 @@ void VideoPlayer::decodeVideo( double startTime){
 
             // qDebug() << "_vTime" << _vTime << "startTime" << startTime ;
 
-                _vTime=_vTime-startTime;
+            _vTime=_vTime-startTime;
         }
 
         // 发送压缩数据到解码器

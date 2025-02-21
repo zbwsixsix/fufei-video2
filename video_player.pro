@@ -18,7 +18,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
     condmutex.cpp \
     main.cpp \
-    playerwindow.cpp \
+    playerwidget.cpp \
     videoplayer.cpp \
     videoplayer_audio.cpp \
     videoplayer_video.cpp \
@@ -27,13 +27,13 @@ SOURCES += \
 
 HEADERS += \
     condmutex.h \
-    playerwindow.h \
+    playerwidget.h \
     videoplayer.h \
     videoslider.h \
     videowidget.h
 
 FORMS += \
-    playerwindow.ui
+    playerwidget.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
@@ -48,17 +48,6 @@ msvc {
 win32{
     FFMPEG_DIR = $$PWD/sdk/ffmpeg
     SDL_DIR = $$PWD/sdk/SDL2
-    # LIBS += -LD:/ffmpeg/lib/ -lavfilter -ld3d11 -ldxgi -lcuda -lnppc
-    #     DEFINES += HWACCEL_ENABLED
-
-
-
-# LIBS += -LD:/ffmpeg/lib/ -lavcodec -lavutil -lswscale -lavfilter
-#    INCLUDEPATH += D:/ffmpeg/include/
-
-#    # 添加硬件加速支持库
-#    LIBS += -LD:/ffmpeg/lib/ -lcuda -lcudart -lnppc -lnppicc
-#    LIBS += -ld3d11 -ldxgi -ldxguid
 }
 
 INCLUDEPATH += $${FFMPEG_DIR}/include
@@ -76,3 +65,5 @@ LIBS += -L$${SDL_DIR}/lib \
 
 Debug:DESTDIR = $$PWD/bin
 Release:DESTDIR = $$PWD/bin
+
+message("Debug Path: " $$PWD/bin)

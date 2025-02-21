@@ -1,4 +1,4 @@
-﻿#include "playerwindow.h"
+﻿#include "playerwidget.h"
 
 #include <QApplication>
 
@@ -26,7 +26,7 @@ int main(int argc, char *argv[])
 // #endif
 
     QApplication a(argc, argv);
-    PlayerWindow w;
+    PlayerWidget w;
     w.show();
     return a.exec();
 }

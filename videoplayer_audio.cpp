@@ -129,6 +129,7 @@ void VideoPlayer::freeAudio(){
     // 停止播放
     SDL_PauseAudio(1);
     SDL_CloseAudio();
+    closeAudio();
 }
 
 void VideoPlayer::sdlAudioCallbackFunc(void *userdata, uint8_t *stream, int len){
@@ -152,10 +153,10 @@ int VideoPlayer::initSDL(){
     spec.callback = sdlAudioCallbackFunc;
     // 传递给回调的参数
     spec.userdata = this;
-
-    // 打开音频设备
-    if (SDL_OpenAudio(&spec, nullptr)) {
-        qDebug() << "SDL_OpenAudio error" << SDL_GetError();
+    // 打开独立的音频设备
+    _audioDeviceId = SDL_OpenAudioDevice(nullptr, 0, &spec, nullptr, 0);
+    if (_audioDeviceId == 0) {
+        qDebug() << "SDL_OpenAudioDevice error" << SDL_GetError();
         return -1;
     }
 

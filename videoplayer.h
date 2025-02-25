@@ -89,6 +89,8 @@ public:
     void setMute(bool mute);
     bool isMute();
 
+    void closeAudio();
+
 signals:
     void stateChanged(VideoPlayer *player);
     void timeChanged(VideoPlayer *player);
@@ -97,6 +99,7 @@ signals:
     void frameDecoded(VideoPlayer *player,uint8_t *data,VideoSwsSpec &spec);
 
 private:
+    SDL_AudioDeviceID _audioDeviceId = 0;
     /******** 音频相关 ********/
     typedef struct {
         int sampleRate;

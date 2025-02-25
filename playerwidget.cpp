@@ -16,6 +16,11 @@ PlayerWidget::PlayerWidget(QWidget *parent)
 
     // 创建播放器
     _player = new VideoPlayer();
+
+    // _videoWidget = new VideoWidget(this);
+    // _slider = new VideoSlider(this);
+
+
     connect(_player, &VideoPlayer::stateChanged,this, &PlayerWidget::onPlayerStateChanged);
     connect(_player, &VideoPlayer::timeChanged,this, &PlayerWidget::onPlayerTimeChanged);
     connect(_player, &VideoPlayer::initFinished,this, &PlayerWidget::onPlayerInitFinished);
@@ -108,6 +113,7 @@ void PlayerWidget::on_openFileBtn_clicked() {
     // QString filename2="d:/Users/zhangbowen/Videos/20min.mp4";
     // 开始播放打开的文件
     _player->setFilename(filename);
+
     _player->play();
 }
 

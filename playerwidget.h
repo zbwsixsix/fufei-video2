@@ -16,7 +16,10 @@ class PlayerWidget : public QMainWindow {
 
 public:
     PlayerWidget(QWidget *parent = nullptr);
+      // VideoPlayer *_player;
     ~PlayerWidget();
+
+    VideoPlayer* getPlayer() { return _player; }
 
 private slots:
     void onPlayerStateChanged(VideoPlayer *player);

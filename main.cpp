@@ -28,5 +28,26 @@ int main(int argc, char *argv[])
     QApplication a(argc, argv);
     PlayerWidget w;
     w.show();
+
+    PlayerWidget w2;
+    w2.show();
+
+
+    // 示例：自动加载第一个视频文件
+    // QString filename1 = "d:/Users/zhangbowen/Videos/02test.mp4";  // 替换为实际路径
+    // w.findChild<VideoPlayer*>("_player")->setFilename(filename1);
+    // w.findChild<VideoPlayer*>("_player")->play();
+
+    // 创建第二个窗口并加载第二个视频
+    // PlayerWidget w2;
+    // w2.show();
+    // // 示例：自动加载第二个视频文件
+    // QString filename2 = "d:/Users/zhangbowen/Videos/13min.mp4";  // 替换为实际路径
+    // w2.findChild<VideoPlayer*>("_player")->setFilename(filename2);
+    // w2.findChild<VideoPlayer*>("_player")->play();
+
+
+    // PlayerWidget w3;
+    // w3.show();
     return a.exec();
 }

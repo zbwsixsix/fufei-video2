@@ -5,6 +5,10 @@
 #define VIDEO_MAX_PKT_SIZE 500
 
 VideoPlayer::VideoPlayer(QObject *parent) : QObject(parent) {
+
+    // 关闭之前的音频设备
+    // closeAudio();
+
     // 初始化Audio子系统
     if (SDL_Init(SDL_INIT_AUDIO)) {
         // 返回值不是0，就代表失败
@@ -14,13 +18,24 @@ VideoPlayer::VideoPlayer(QObject *parent) : QObject(parent) {
     }
 }
 
+
+void VideoPlayer::closeAudio() {
+    // 停止播放
+    if (_audioDeviceId != 0) {
+        SDL_PauseAudioDevice(_audioDeviceId, 1);
+        SDL_CloseAudioDevice(_audioDeviceId);
+        _audioDeviceId = 0;
+    }
+}
+
+
 VideoPlayer::~VideoPlayer() {
     // 不再对外发送消息
     disconnect();
 
     stop();
 
-    SDL_Quit();
+    SDL_QuitSubSystem(SDL_INIT_AUDIO);  // 只清理当前实例的音频子系统
 }
 
 void VideoPlayer::play() {
@@ -130,7 +145,9 @@ bool VideoPlayer::isMute() {
     return _mute;
 }
 
-void VideoPlayer::readFile(){   
+void VideoPlayer::readFile(){
+
+    freeAudio();
     int ret = 0;
 
     // 创建解封装上下文、打开文件
@@ -165,6 +182,11 @@ void VideoPlayer::readFile(){
 
     // 改变状态
     setState(Playing);
+
+    // 启动音频播放
+    if (_audioDeviceId != 0) {
+        SDL_PauseAudioDevice(_audioDeviceId, 0);  // 启动音频设备播放
+    }
 
     // 音频解码子线程：开始工作
     SDL_PauseAudio(0);

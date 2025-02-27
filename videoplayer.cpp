@@ -7,15 +7,15 @@
 VideoPlayer::VideoPlayer(QObject *parent) : QObject(parent) {
 
     // 关闭之前的音频设备
-    // closeAudio();
+     // closeAudio();
 
     // 初始化Audio子系统
-    if (SDL_Init(SDL_INIT_AUDIO)) {
-        // 返回值不是0，就代表失败
-        qDebug() << "SDL_Init error" << SDL_GetError();
-        emit playFailed(this);
-        return;
-    }
+    // if (SDL_Init(SDL_INIT_AUDIO)) {
+    //     // 返回值不是0，就代表失败
+    //     qDebug() << "SDL_Init error" << SDL_GetError();
+    //     emit playFailed(this);
+    //     return;
+    // }
 }
 
 
@@ -185,11 +185,15 @@ void VideoPlayer::readFile(){
 
     // 启动音频播放
     if (_audioDeviceId != 0) {
-        SDL_PauseAudioDevice(_audioDeviceId, 0);  // 启动音频设备播放
+        SDL_PauseAudioDevice(_audioDeviceId, 0); // 解除暂停，确保开始播放
+        qDebug() << "Audio device" << _audioDeviceId << "started";
+    } else {
+        qDebug() << "No audio device available";
     }
 
     // 音频解码子线程：开始工作
-    SDL_PauseAudio(0);
+    // SDL_PauseAudio(0);
+    // SDL_PauseAudioDevice(_audioDeviceId, 0);
 
     // 开启新的线程去解码视频数据
     std::thread([this, startTime]() {
@@ -210,17 +214,17 @@ void VideoPlayer::readFile(){
             }
             qDebug()<< "startTime是RRRRRRR"<< startTime;
             qDebug()<< "_seekTime+startTime是RRRRRRR"<< _seekTime+startTime;
-             qDebug() << "streamIdx"<<streamIdx;
+            qDebug() << "streamIdx"<<streamIdx;
             // 现实时间 -> 时间戳
             AVRational timeBase = _fmtCtx->streams[streamIdx]->time_base;
 
-             qDebug() << "av_q2d(timeBase)是多少" << av_q2d(timeBase);
+            qDebug() << "av_q2d(timeBase)是多少" << av_q2d(timeBase);
             int64_t ts = _seekTime / av_q2d(timeBase);
 
-             // int64_t ts = av_rescale_q(_seekTime, AV_TIME_BASE_Q, _fmtCtx->streams[0]->time_base)*10000;
+            // int64_t ts = av_rescale_q(_seekTime, AV_TIME_BASE_Q, _fmtCtx->streams[0]->time_base)*10000;
             qDebug()<< "_seekTime是TTTTTT"<< _seekTime;
             // int64_t ts =2064000;
-             qDebug() << "ts是多少" <<  ts<<"streamIdx"<<streamIdx;
+            qDebug() << "ts是多少" <<  ts<<"streamIdx"<<streamIdx;
             // ret = av_seek_frame(_fmtCtx, streamIdx, ts, AVSEEK_FLAG_BACKWARD|AVSEEK_FLAG_FRAME);
             // ret = avformat_seek_file(_fmtCtx, streamIdx, INT64_MIN, ts, INT64_MAX, AVSEEK_FLAG_BACKWARD);
 
@@ -355,9 +359,10 @@ void VideoPlayer::setState(State state) {
 void VideoPlayer::free(){
     while (_hasAudio && !_aCanFree);
     while (_hasVideo && !_vCanFree);
-    while (!_fmtCtxCanFree);
-    avformat_close_input(&_fmtCtx);
-    _fmtCtxCanFree = false;
+    while (!_fmtCtxCanFree){
+        avformat_close_input(&_fmtCtx);
+        _fmtCtxCanFree = false;
+    }
     _seekTime = -1;
 
     freeAudio();

@@ -15,7 +15,7 @@ PlayerWidget::PlayerWidget(QWidget *parent)
     qRegisterMetaType<VideoPlayer::VideoSwsSpec>("VideoSwsSpec&");
 
     // 创建播放器
-    _player = new VideoPlayer();
+    _player = new VideoPlayer(this);
 
     // _videoWidget = new VideoWidget(this);
     // _slider = new VideoSlider(this);

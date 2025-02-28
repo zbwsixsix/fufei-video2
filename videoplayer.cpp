@@ -10,12 +10,12 @@ VideoPlayer::VideoPlayer(QObject *parent) : QObject(parent) {
      closeAudio();
 
     // 初始化Audio子系统
-    // if (SDL_Init(SDL_INIT_AUDIO)) {
-    //     // 返回值不是0，就代表失败
-    //     qDebug() << "SDL_Init error" << SDL_GetError();
-    //     emit playFailed(this);
-    //     return;
-    // }
+    if (SDL_Init(SDL_INIT_AUDIO)) {
+        // 返回值不是0，就代表失败
+        qDebug() << "SDL_Init error" << SDL_GetError();
+        emit playFailed(this);
+        return;
+    }
 }
 
 void VideoPlayer::testSineWave(double freq) {

@@ -44,44 +44,12 @@ int main(int argc, char *argv[])
     w.getPlayer()->setFilename(filename1);
     w.getPlayer()->play();
 
-    // PlayerWidget w3;
-    // w3.show();
-    // // QString filename1 = "d:/Users/zhangbowen/Videos/02test.mp4"; // 替换为实际路径
-    // w3.getPlayer()->setFilename(filename1);
-    // w3.getPlayer()->play();
-
-    // PlayerWidget w4;
-    // w.show();
-    // // QString filename1 = "d:/Users/zhangbowen/Videos/02test.mp4"; // 替换为实际路径
-    // w4.getPlayer()->setFilename(filename1);
-    // w4.getPlayer()->play();
-
-    PlayerWidget w5;
-    w5.show();
-    // QString filename1 = "d:/Users/zhangbowen/Videos/02test.mp4"; // 替换为实际路径
-    w5.getPlayer()->setFilename(filename1);
-    w5.getPlayer()->play();
-
     // 第二个播放器窗口
-    PlayerWidget w2;
-    w2.show();
-    QString filename2 = "d:/Users/zhangbowen/Videos/13min.mp4"; // 替换为实际路径
-    w2.getPlayer()->setFilename(filename2);
-    w2.getPlayer()->play();
-
-
-    // PlayerWidget w;
-    // w.show();
-    // w.getPlayer()->testSineWave(880.0);
-
     // PlayerWidget w2;
     // w2.show();
-    // w2.getPlayer()->testSineWave(110.0);
-
-
-
-
-
+    // QString filename2 = "d:/Users/zhangbowen/Videos/13min.mp4"; // 替换为实际路径
+    // w2.getPlayer()->setFilename(filename2);
+    // w2.getPlayer()->play();
 
     // PlayerWidget w3;
     // w3.show();

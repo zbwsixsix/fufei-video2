@@ -46,8 +46,8 @@ PlayerWidget::~PlayerWidget() {
 
 // 重写 closeEvent
 void PlayerWidget::closeEvent(QCloseEvent *event) {
-    _player->pause(); // 停止播放，确保资源清理
-    emit windowClosed(this); // 发出窗口关闭信号
+    // _player->stop(); // 停止播放，确保资源清理
+    // emit windowClosed(this); // 发出窗口关闭信号
 }
 
 

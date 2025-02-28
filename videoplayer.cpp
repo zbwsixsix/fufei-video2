@@ -7,7 +7,7 @@
 VideoPlayer::VideoPlayer(QObject *parent) : QObject(parent) {
 
     // 关闭之前的音频设备
-     // closeAudio();
+     closeAudio();
 
     // 初始化Audio子系统
     // if (SDL_Init(SDL_INIT_AUDIO)) {
@@ -18,13 +18,41 @@ VideoPlayer::VideoPlayer(QObject *parent) : QObject(parent) {
     // }
 }
 
+void VideoPlayer::testSineWave(double freq) {
+    _sineFreq = freq; // 设置频率
+
+    // 初始化 SDL 音频参数
+    SDL_AudioSpec spec;
+    spec.freq = _sineSampleRate;
+    spec.format = AUDIO_S16LSB;
+    spec.channels = 1; // 单声道
+    spec.samples = 512;
+    spec.callback = sdlAudioCallbackFunc;
+    spec.userdata = this;
+
+    // 打开音频设备
+    _audioDeviceId = SDL_OpenAudioDevice(nullptr, 0, &spec, nullptr, 0);
+    if (_audioDeviceId == 0) {
+        qDebug() << "SDL_OpenAudioDevice error" << SDL_GetError();
+        return;
+    }
+    qDebug() << "Audio device ID:" << _audioDeviceId << "Freq:" << _sineFreq;
+
+    // 启动音频播放
+    SDL_PauseAudioDevice(_audioDeviceId, 0);
+}
+
+
 
 void VideoPlayer::closeAudio() {
+
     // 停止播放
     if (_audioDeviceId != 0) {
         SDL_PauseAudioDevice(_audioDeviceId, 1);
+        SDL_ClearQueuedAudio(_audioDeviceId);    // 清空音频队列
         SDL_CloseAudioDevice(_audioDeviceId);
         _audioDeviceId = 0;
+        qDebug() << "Audio device closed for player instance";
     }
 }
 
@@ -35,7 +63,9 @@ VideoPlayer::~VideoPlayer() {
 
     stop();
 
-    SDL_QuitSubSystem(SDL_INIT_AUDIO);  // 只清理当前实例的音频子系统
+
+    closeAudio();
+    // SDL_QuitSubSystem(SDL_INIT_AUDIO);  // 只清理当前实例的音频子系统
 }
 
 void VideoPlayer::play() {
@@ -185,15 +215,15 @@ void VideoPlayer::readFile(){
 
     // 启动音频播放
     if (_audioDeviceId != 0) {
-        SDL_PauseAudioDevice(_audioDeviceId, 0); // 解除暂停，确保开始播放
-        qDebug() << "Audio device" << _audioDeviceId << "started";
+        // SDL_PauseAudioDevice(_audioDeviceId, 0);
+        qDebug() << "Audio device status after start:" << SDL_GetAudioDeviceStatus(_audioDeviceId);
     } else {
         qDebug() << "No audio device available";
     }
 
     // 音频解码子线程：开始工作
     // SDL_PauseAudio(0);
-    // SDL_PauseAudioDevice(_audioDeviceId, 0);
+    SDL_PauseAudioDevice(_audioDeviceId, 0);
 
     // 开启新的线程去解码视频数据
     std::thread([this, startTime]() {
@@ -265,6 +295,7 @@ void VideoPlayer::readFile(){
         ret = av_read_frame(_fmtCtx, &pkt);
         if (ret == 0) {
             if (pkt.stream_index == _aStream->index) { // 读取到的是音频数据
+
                 addAudioPkt(pkt);
             } else if (pkt.stream_index == _vStream->index) { // 读取到的是视频数据
                 addVideoPkt(pkt);
@@ -357,6 +388,13 @@ void VideoPlayer::setState(State state) {
 }
 
 void VideoPlayer::free(){
+
+
+        if (_fmtCtx) {
+            avformat_close_input(&_fmtCtx);
+            _fmtCtx = nullptr;
+        }
+
     while (_hasAudio && !_aCanFree);
     while (_hasVideo && !_vCanFree);
     while (!_fmtCtxCanFree){

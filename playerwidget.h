@@ -21,6 +21,12 @@ public:
 
     VideoPlayer* getPlayer() { return _player; }
 
+signals:
+    void windowClosed(PlayerWidget *widget); // 新增信号，表示窗口关闭
+
+protected:
+    void closeEvent(QCloseEvent *event) override; // 重写关闭事件
+
 private slots:
     void onPlayerStateChanged(VideoPlayer *player);
     void onPlayerTimeChanged(VideoPlayer *player);

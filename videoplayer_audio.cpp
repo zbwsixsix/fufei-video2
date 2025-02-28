@@ -49,12 +49,8 @@ int VideoPlayer::initSwr() {
     _aSwrOutSpec.chs = _aDecodeCtx->ch_layout.nb_channels;  // 显式设置立体声
     _aSwrOutSpec.bytesPerSampleFrame = _aSwrOutSpec.chs * av_get_bytes_per_sample(_aSwrOutSpec.sampleFmt);
 
-    // 验证声道布局
-    char buf[64];
-    av_channel_layout_describe(&_aSwrInSpec.chLayout, buf, sizeof(buf));
-    qDebug() << "Input layout:" << buf;
-    av_channel_layout_describe(&_aSwrOutSpec.chLayout, buf, sizeof(buf));
-    qDebug() << "Output layout:" << buf;
+    qDebug() << "Swr Out: fmt=" << av_get_sample_fmt_name(_aSwrOutSpec.sampleFmt)
+             << "rate=" << _aSwrOutSpec.sampleRate << "chs=" << _aSwrOutSpec.chs;
 
 
     int ret = swr_alloc_set_opts2(
@@ -91,11 +87,9 @@ int VideoPlayer::initSwr() {
     }
 
     // 初始化重采样的输出frame的data[0]空间
-    ret = av_samples_alloc(_aSwrOutFrame->data,
-                           &_aSwrOutFrame->linesize[0],
-                           _aSwrOutSpec.chs,
-                           4096, _aSwrOutSpec.sampleFmt, 1);
-    RET(av_samples_alloc);
+    ret = av_samples_alloc(_aSwrOutFrame->data, &_aSwrOutFrame->linesize[0],
+                           _aSwrOutSpec.chs, 4096, _aSwrOutSpec.sampleFmt, 1);
+    qDebug() << "Allocated buffer size:" << _aSwrOutFrame->linesize[0];
 
     return 0;
 }
@@ -118,7 +112,7 @@ void VideoPlayer::freeAudio(){
 
     // 停止播放
     SDL_PauseAudio(1);
-    SDL_CloseAudio();
+    // SDL_CloseAudio();
     closeAudio();
 }
 
@@ -135,39 +129,34 @@ int VideoPlayer::initSDL(){
         qDebug() << "Device" << i << ":" << SDL_GetAudioDeviceName(i, 0);
     }
     // 音频参数
-    SDL_AudioSpec spec, actual;
-    // 采样率
-    spec.freq = _aSwrOutSpec.sampleRate;
-    // 采样格式（s16le）
-    spec.format = AUDIO_S16LSB;
-    // 声道数
-    spec.channels = _aSwrOutSpec.chs;
-    // 音频缓冲区的样本数量（这个值必须是2的幂）
-    spec.samples = 512;
-    // 回调
-    spec.callback = sdlAudioCallbackFunc;
-    // 传递给回调的参数
-    spec.userdata = this;
+    SDL_AudioSpec spec;
+    spec.freq = _aSwrOutSpec.sampleRate;     // 采样率（如44.1kHz）
+    spec.format = AUDIO_S16LSB;              // 采样格式（16位有符号小端）
+    spec.channels = _aSwrOutSpec.chs;        // 声道数（如2声道立体声）
+    spec.samples = 512;                      // 音频缓冲区大小（必须是2的幂）
+    spec.callback = sdlAudioCallbackFunc;    // 音频回调函数
+    spec.userdata = this;                    // 回调函数的用户数据（传递this指针）
     // 打开独立的音频设备
     _audioDeviceId = SDL_OpenAudioDevice(nullptr, 0, &spec, nullptr, 0);
+    // _audioDeviceId = SDL_OpenAudioDevice(SDL_GetAudioDeviceName(1, 0), 0, &spec, nullptr, 0);
     if (_audioDeviceId == 0) {
         qDebug() << "SDL_OpenAudioDevice error" << SDL_GetError();
         return -1;
     }
-    qDebug() << "Audio device opened with ID:" << _audioDeviceId
-             << "Freq:" << actual.freq
-             << "Channels:" << (int)actual.channels
-             << "Samples:" << actual.samples;
+    qDebug() << "SDL: freq=" << spec.freq << "channels=" << (int)spec.channels
+             << "format=AUDIO_S16LSB" << "device ID=" << _audioDeviceId;
+
 
     // 打开音频设备
     // 验证缓冲区大小
 
 
-    // if (SDL_OpenAudio(&spec, nullptr)) {
-    //     qDebug() << "SDL_OpenAudio error" << SDL_GetError();
-    //     return -1;
-    // }
-
+    if (SDL_OpenAudio(&spec, nullptr)) {
+        qDebug() << "SDL_OpenAudio error" << SDL_GetError();
+        return -1;
+    }
+    SDL_AudioStatus status = SDL_GetAudioDeviceStatus(_audioDeviceId);
+    qDebug() << "Initial device status:" << (status == SDL_AUDIO_PLAYING ? "PLAYING" : "STOPPED");
     return 0;
 }
 
@@ -188,9 +177,10 @@ void VideoPlayer::clearAudioPktList(){
 }
 
 void VideoPlayer::sdlAudioCallback(Uint8 *stream, int len,double startTime){
-    // qDebug() << "sdlAudioCallback called, len:" << len;
-    // 清零（静音）
+    // qDebug() << "sdlAudioCallback called for device" << _audioDeviceId << "len:" << len;
     SDL_memset(stream, 0, len);
+    // 清零（静音）
+
 
     // len：SDL音频缓冲区剩余的大小（还未填充的大小）
     while (len > 0) {
@@ -215,14 +205,14 @@ void VideoPlayer::sdlAudioCallback(Uint8 *stream, int len,double startTime){
                 memset(_aSwrOutFrame->data[0], 0, _aSwrOutSize);
                 qDebug() << "No audio decoded, filling silence"<< _aSwrOutSize;
             } else {
-                qDebug() << "Decoded audio size:" << _aSwrOutSize;
+                // qDebug() << "Decoded audio size:" << _aSwrOutSize;
             }
         }
 
         // 本次需要填充到stream中的PCM数据大小
         int fillLen = std::min(_aSwrOutSize - _aSwrOutIdx, len);
         int volumn = _mute ? 0 : ((_volumn * 1.0 / Max) * SDL_MIX_MAXVOLUME);
-        qDebug() << "Fill length:" << fillLen << "Volume:" << volumn << "Mute:" << _mute;
+        // qDebug() << "Fill length:" << fillLen << "Volume:" << volumn << "Mute:" << _mute;
 
         SDL_MixAudio(stream, _aSwrOutFrame->data[0] + _aSwrOutIdx, fillLen, volumn);
 
@@ -233,11 +223,32 @@ void VideoPlayer::sdlAudioCallback(Uint8 *stream, int len,double startTime){
     }
 }
 
+
+// 修改回调函数以生成正弦波
+// void VideoPlayer::sdlAudioCallback(Uint8 *stream, int len, double startTime) {
+//     (void)startTime; // 未使用 startTime
+//     int16_t *buffer = (int16_t *)stream;
+//     int samples = len / sizeof(int16_t);
+
+//     for (int i = 0; i < samples; i++) {
+//         double time = _sinePhase + (i * _sineFreq / _sineSampleRate);
+//         buffer[i] = static_cast<int16_t>(32767 * sin(2.0 * M_PI * time));
+//     }
+
+//     _sinePhase += samples * _sineFreq / _sineSampleRate;
+//     _sinePhase = fmod(_sinePhase, 1.0);
+
+//     qDebug() << "Callback for device" << _audioDeviceId << "freq:" << _sineFreq << "len:" << len;
+// }
+
+
 /**
  * @brief VideoPlayer::decodeAudio
  * @return 解码出来的pcm大小
  */
 int VideoPlayer::decodeAudio(double startTime) {
+
+
     _aMutex.lock();
     if (_aPktList.empty() || _state == Stopped) {
         _aMutex.unlock();

@@ -27,6 +27,8 @@ PlayerWidget::PlayerWidget(QWidget *parent)
     connect(_player, &VideoPlayer::playFailed,this, &PlayerWidget::onPlayerPlayFailed);
     connect(_player, &VideoPlayer::frameDecoded,ui->videoWidget, &VideoWidget::onPlayerFrameDecoded);
     connect(_player, &VideoPlayer::stateChanged,ui->videoWidget, &VideoWidget::onPlayerStateChanged);
+
+
     // 监听时间滑块的点击
     connect(ui->currentSlider, &VideoSlider::clicked,
                 this, &PlayerWidget::onSliderClicked);
@@ -40,6 +42,14 @@ PlayerWidget::~PlayerWidget() {
     delete ui;
     delete _player;
 }
+
+
+// 重写 closeEvent
+void PlayerWidget::closeEvent(QCloseEvent *event) {
+    _player->pause(); // 停止播放，确保资源清理
+    emit windowClosed(this); // 发出窗口关闭信号
+}
+
 
 void PlayerWidget::onSliderClicked(VideoSlider *slider) {
     _player->setTime(slider->value());
@@ -90,7 +100,7 @@ void PlayerWidget::onPlayerStateChanged(VideoPlayer *player) {
         ui->playBtn->setEnabled(true);
         ui->stopBtn->setEnabled(true);
         ui->currentSlider->setEnabled(true);
-        ui->volumnSlider->setEnabled(true);
+        qDebug() << "Initial volume set to:" << ui->volumnSlider->value();
         ui->muteBtn->setEnabled(true);
 
         // 显示播放视频的页面

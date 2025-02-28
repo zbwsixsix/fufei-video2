@@ -91,6 +91,9 @@ public:
 
     void closeAudio();
 
+    // 测试用正弦波参数
+   void testSineWave(double freq = 440.0); // 添加频率参数，默认 440Hz
+
 signals:
     void stateChanged(VideoPlayer *player);
     void timeChanged(VideoPlayer *player);
@@ -99,6 +102,12 @@ signals:
     void frameDecoded(VideoPlayer *player,uint8_t *data,VideoSwsSpec &spec);
 
 private:
+
+    // 正弦波参数
+    double _sinePhase = 0.0; // 相位
+     double _sineFreq = 440.0; // 频率（Hz，例如 A 音）
+    const int _sineSampleRate = 44100; // 采样率
+
     SDL_AudioDeviceID _audioDeviceId = 0;
     /******** 音频相关 ********/
     typedef struct {

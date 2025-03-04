@@ -23,17 +23,20 @@ SOURCES += \
     videoplayer_audio.cpp \
     videoplayer_video.cpp \
     videoslider.cpp \
-    videowidget.cpp
+    videowidget.cpp \
+    window1.cpp
 
 HEADERS += \
     condmutex.h \
     playerwidget.h \
     videoplayer.h \
     videoslider.h \
-    videowidget.h
+    videowidget.h \
+    window1.h
 
 FORMS += \
-    playerwidget.ui
+    playerwidget.ui \
+    window1.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

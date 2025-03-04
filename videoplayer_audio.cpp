@@ -140,7 +140,7 @@ int VideoPlayer::initSDL(){
     _audioDeviceId = SDL_OpenAudioDevice(nullptr, 0, &spec, nullptr, 0);
     // _audioDeviceId = SDL_OpenAudioDevice(SDL_GetAudioDeviceName(1, 0), 0, &spec, nullptr, 0);
     if (_audioDeviceId == 0) {
-        qDebug() << "SDL_OpenAudioDevice error" << SDL_GetError();
+        qDebug() << "AAAAA SDL_OpenAudioDevice error" << SDL_GetError();
         return -1;
     }
     qDebug() << "SDL: freq=" << spec.freq << "channels=" << (int)spec.channels

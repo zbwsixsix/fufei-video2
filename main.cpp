@@ -4,6 +4,7 @@
 
 #ifdef _WIN32
 #include <windows.h>
+#include<window1.h>
 #ifdef _MSC_VER
 #pragma comment(lib, "user32.lib")
 #endif
@@ -30,24 +31,24 @@ int main(int argc, char *argv[])
         return -1;
     }
     QApplication a(argc, argv);
-    // PlayerWidget w;
-    // w.show();
+    window1 w;
+    w.show();
 
     // PlayerWidget w2;
     // w2.show();
 
 
 
-    PlayerWidget w;
-    w.show();
-    QString filename1 = "d:/Users/zhangbowen/Videos/02test.mp4"; // 替换为实际路径
-    w.getPlayer()->setFilename(filename1);
-    w.getPlayer()->play();
+    // PlayerWidget w;
+    // w.show();
+    // QString filename1 = "d:/Users/zhangbowen/Videos/02test.mp4"; // 替换为实际路径
+    // w.getPlayer()->setFilename(filename1);
+    // w.getPlayer()->play();
 
     // 第二个播放器窗口
     // PlayerWidget w2;
     // w2.show();
-    // QString filename2 = "d:/Users/zhangbowen/Videos/13min.mp4"; // 替换为实际路径
+    // QString filename2 = "d:/Users/zhangbowen/Videos/45min.mp4"; // 替换为实际路径
     // w2.getPlayer()->setFilename(filename2);
     // w2.getPlayer()->play();
 

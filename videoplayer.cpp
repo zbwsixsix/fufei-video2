@@ -10,36 +10,12 @@ VideoPlayer::VideoPlayer(QObject *parent) : QObject(parent) {
      closeAudio();
 
     // 初始化Audio子系统
-    if (SDL_Init(SDL_INIT_AUDIO)) {
-        // 返回值不是0，就代表失败
-        qDebug() << "SDL_Init error" << SDL_GetError();
-        emit playFailed(this);
-        return;
-    }
-}
-
-void VideoPlayer::testSineWave(double freq) {
-    _sineFreq = freq; // 设置频率
-
-    // 初始化 SDL 音频参数
-    SDL_AudioSpec spec;
-    spec.freq = _sineSampleRate;
-    spec.format = AUDIO_S16LSB;
-    spec.channels = 1; // 单声道
-    spec.samples = 512;
-    spec.callback = sdlAudioCallbackFunc;
-    spec.userdata = this;
-
-    // 打开音频设备
-    _audioDeviceId = SDL_OpenAudioDevice(nullptr, 0, &spec, nullptr, 0);
-    if (_audioDeviceId == 0) {
-        qDebug() << "SDL_OpenAudioDevice error" << SDL_GetError();
-        return;
-    }
-    qDebug() << "Audio device ID:" << _audioDeviceId << "Freq:" << _sineFreq;
-
-    // 启动音频播放
-    SDL_PauseAudioDevice(_audioDeviceId, 0);
+    // if (SDL_Init(SDL_INIT_AUDIO)) {
+    //     // 返回值不是0，就代表失败
+    //     qDebug() << "SDL_Init error" << SDL_GetError();
+    //     emit playFailed(this);
+    //     return;
+    // }
 }
 
 
@@ -49,6 +25,7 @@ void VideoPlayer::closeAudio() {
     // 停止播放
     if (_audioDeviceId != 0) {
         SDL_PauseAudioDevice(_audioDeviceId, 1);
+        SDL_Delay(10);
         SDL_ClearQueuedAudio(_audioDeviceId);    // 清空音频队列
         SDL_CloseAudioDevice(_audioDeviceId);
         _audioDeviceId = 0;
@@ -62,8 +39,6 @@ VideoPlayer::~VideoPlayer() {
     disconnect();
 
     stop();
-
-
     closeAudio();
     // SDL_QuitSubSystem(SDL_INIT_AUDIO);  // 只清理当前实例的音频子系统
 }
@@ -95,7 +70,6 @@ void VideoPlayer::stop() {
 
     // 改变状态
     _state = Stopped;
-
     // 释放资源
     free();
 

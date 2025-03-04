@@ -91,8 +91,6 @@ public:
 
     void closeAudio();
 
-    // 测试用正弦波参数
-   void testSineWave(double freq = 440.0); // 添加频率参数，默认 440Hz
 
 signals:
     void stateChanged(VideoPlayer *player);

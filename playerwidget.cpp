@@ -46,8 +46,10 @@ PlayerWidget::~PlayerWidget() {
 
 // 重写 closeEvent
 void PlayerWidget::closeEvent(QCloseEvent *event) {
-    // _player->stop(); // 停止播放，确保资源清理
-    // emit windowClosed(this); // 发出窗口关闭信号
+    disconnect(_player, nullptr, this, nullptr);
+    _player->stop(); // 停止播放，确保资源清理
+    emit windowClosed(this); // 发出窗口关闭信号
+
 }
 
 
@@ -102,7 +104,7 @@ void PlayerWidget::onPlayerStateChanged(VideoPlayer *player) {
         ui->currentSlider->setEnabled(true);
         qDebug() << "Initial volume set to:" << ui->volumnSlider->value();
         ui->muteBtn->setEnabled(true);
-
+        ui->volumnSlider->setEnabled(true);
         // 显示播放视频的页面
         ui->playWidget->setCurrentWidget(ui->videoPage);
     }

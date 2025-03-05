@@ -97,7 +97,7 @@ void VideoPlayer::clearVideoPktList(){
 void VideoPlayer::freeVideo(){
     clearVideoPktList();
     // 在 clearVideoPktList() 后刷新解码器
-    if (_hasVideo) {
+    if (_hasVideo&& _vDecodeCtx) {
         avcodec_flush_buffers(_vDecodeCtx);
     }
 

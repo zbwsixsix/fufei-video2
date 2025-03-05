@@ -17,14 +17,25 @@ void window1::on_pushButton_clicked()
 {
     PlayerWidget *w = new PlayerWidget(); // 动态分配
     w->setAttribute(Qt::WA_DeleteOnClose); // 关闭时自动删除
-    w->show();
     QString filename1 = "d:/Users/zhangbowen/Videos/02test.mp4";
+    w->getPlayer()->setFilename(filename1);
+    w->getPlayer()->play();
+     w->show();
+}
+
+
+void window1::on_pushButton_2_clicked()
+{
+    PlayerWidget *w = new PlayerWidget(); // 动态分配
+    w->setAttribute(Qt::WA_DeleteOnClose); // 关闭时自动删除
+    w->show();
+    QString filename1 = "d:/Users/zhangbowen/Videos/20min.mp4";
     w->getPlayer()->setFilename(filename1);
     w->getPlayer()->play();
 }
 
 
-void window1::on_pushButton_2_clicked()
+void window1::on_pushButton_3_clicked()
 {
     PlayerWidget *w = new PlayerWidget(); // 动态分配
     w->setAttribute(Qt::WA_DeleteOnClose); // 关闭时自动删除

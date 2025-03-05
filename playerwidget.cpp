@@ -102,7 +102,6 @@ void PlayerWidget::onPlayerStateChanged(VideoPlayer *player) {
         ui->playBtn->setEnabled(true);
         ui->stopBtn->setEnabled(true);
         ui->currentSlider->setEnabled(true);
-        qDebug() << "Initial volume set to:" << ui->volumnSlider->value();
         ui->muteBtn->setEnabled(true);
         ui->volumnSlider->setEnabled(true);
         // 显示播放视频的页面

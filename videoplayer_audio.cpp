@@ -4,13 +4,6 @@ int VideoPlayer::initAudioInfo() {
     int ret = initDecoder(&_aDecodeCtx,&_aStream,AVMEDIA_TYPE_AUDIO);
     RET(initDecoder);
 
-    // 打印音频流参数以确认
-    qDebug() << "Audio sample rate:" << _aDecodeCtx->sample_rate;
-    qDebug() << "Audio sample format:" << _aDecodeCtx->sample_fmt;
-    qDebug() << "Audio channel layout:" << _aDecodeCtx->ch_layout.u.mask;
-    qDebug() << "Audio channels:" << _aDecodeCtx->ch_layout.nb_channels;
-
-
     // 初始化音频重采样
     ret = initSwr();
     RET(initSwr);
@@ -28,12 +21,6 @@ int VideoPlayer::initAudioInfo() {
 }
 
 int VideoPlayer::initSwr() {
-
-    qDebug() << "Audio sample rate:" << _aDecodeCtx->sample_rate;
-    qDebug() << "Audio sample format:" << _aDecodeCtx->sample_fmt;
-    qDebug() << "Audio channel layout:" << _aDecodeCtx->ch_layout.u.mask;
-    qDebug() << "Audio channels:" << _aDecodeCtx->ch_layout.nb_channels;
-
     // 重采样输入参数
     _aSwrInSpec.sampleFmt = _aDecodeCtx->sample_fmt;
     _aSwrInSpec.sampleRate = _aDecodeCtx->sample_rate;
@@ -49,8 +36,8 @@ int VideoPlayer::initSwr() {
     _aSwrOutSpec.chs = _aDecodeCtx->ch_layout.nb_channels;  // 显式设置立体声
     _aSwrOutSpec.bytesPerSampleFrame = _aSwrOutSpec.chs * av_get_bytes_per_sample(_aSwrOutSpec.sampleFmt);
 
-    qDebug() << "Swr Out: fmt=" << av_get_sample_fmt_name(_aSwrOutSpec.sampleFmt)
-             << "rate=" << _aSwrOutSpec.sampleRate << "chs=" << _aSwrOutSpec.chs;
+    // qDebug() << "Swr Out: fmt=" << av_get_sample_fmt_name(_aSwrOutSpec.sampleFmt)
+    //          << "rate=" << _aSwrOutSpec.sampleRate << "chs=" << _aSwrOutSpec.chs;
 
 
     int ret = swr_alloc_set_opts2(
@@ -95,6 +82,10 @@ int VideoPlayer::initSwr() {
 }
 
 void VideoPlayer::freeAudio(){
+
+    if (_hasAudio && _aDecodeCtx) {
+        avcodec_flush_buffers(_aDecodeCtx);
+    }
     _aSwrOutIdx = 0;
     _aSwrOutSize =0;
     _aTime = 0;
@@ -110,9 +101,9 @@ void VideoPlayer::freeAudio(){
         av_frame_free(&_aSwrOutFrame);
     }
 
-    // 停止播放
+    // 使用两个窗口关闭一个两个都没有声音，不使用停止再打开客户的视频进度条有问题
     SDL_PauseAudio(1);
-    // SDL_CloseAudio();
+    SDL_CloseAudio();
     closeAudio();
 }
 
@@ -140,7 +131,7 @@ int VideoPlayer::initSDL(){
     _audioDeviceId = SDL_OpenAudioDevice(nullptr, 0, &spec, nullptr, 0);
     // _audioDeviceId = SDL_OpenAudioDevice(SDL_GetAudioDeviceName(1, 0), 0, &spec, nullptr, 0);
     if (_audioDeviceId == 0) {
-        qDebug() << "AAAAA SDL_OpenAudioDevice error" << SDL_GetError();
+        qDebug() << "SDL_OpenAudioDevice error" << SDL_GetError();
         return -1;
     }
     qDebug() << "SDL: freq=" << spec.freq << "channels=" << (int)spec.channels

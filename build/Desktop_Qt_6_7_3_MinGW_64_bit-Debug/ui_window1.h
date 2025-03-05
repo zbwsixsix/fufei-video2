@@ -21,6 +21,7 @@ class Ui_window1
 public:
     QPushButton *pushButton;
     QPushButton *pushButton_2;
+    QPushButton *pushButton_3;
 
     void setupUi(QWidget *window1)
     {
@@ -33,6 +34,9 @@ public:
         pushButton_2 = new QPushButton(window1);
         pushButton_2->setObjectName("pushButton_2");
         pushButton_2->setGeometry(QRect(320, 200, 93, 28));
+        pushButton_3 = new QPushButton(window1);
+        pushButton_3->setObjectName("pushButton_3");
+        pushButton_3->setGeometry(QRect(140, 270, 93, 28));
 
         retranslateUi(window1);
 
@@ -44,6 +48,7 @@ public:
         window1->setWindowTitle(QCoreApplication::translate("window1", "Form", nullptr));
         pushButton->setText(QCoreApplication::translate("window1", "\346\211\223\345\274\200\350\247\206\351\242\2211", nullptr));
         pushButton_2->setText(QCoreApplication::translate("window1", "\346\211\223\345\274\200\350\247\206\351\242\2212", nullptr));
+        pushButton_3->setText(QCoreApplication::translate("window1", "\346\211\223\345\274\200\350\247\206\351\242\2213", nullptr));
     } // retranslateUi
 
 };

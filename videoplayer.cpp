@@ -6,16 +6,16 @@
 
 VideoPlayer::VideoPlayer(QObject *parent) : QObject(parent) {
 
-    // 关闭之前的音频设备
-     closeAudio();
+        // 关闭之前的音频设备
+    // closeAudio();
 
     // 初始化Audio子系统
-    // if (SDL_Init(SDL_INIT_AUDIO)) {
-    //     // 返回值不是0，就代表失败
-    //     qDebug() << "SDL_Init error" << SDL_GetError();
-    //     emit playFailed(this);
-    //     return;
-    // }
+    if (SDL_Init(SDL_INIT_AUDIO)) {
+        // 返回值不是0，就代表失败
+        qDebug() << "SDL_Init error" << SDL_GetError();
+        emit playFailed(this);
+        return;
+    }
 }
 
 
@@ -332,24 +332,6 @@ int VideoPlayer::initDecoder(AVCodecContext **decodeCtx,AVStream **stream,AVMedi
     // 打开解码器
     ret = avcodec_open2(*decodeCtx, decoder, nullptr);
     RET(avcodec_open2);
-
-    // 在avcodec_open2之后添加
-    //硬件解码加速
-    // if (&decodeCtx->hw_device_ctx == nullptr) {
-    //     av_hwdevice_ctx_create(&decodeCtx->hw_device_ctx,
-    //                            AV_HWDEVICE_TYPE_DXVA2,  // Windows
-    //                            nullptr, nullptr, 0);
-    // }
-    // // 设置硬件像素格式偏好
-    // decodeCtx->get_format = [](AVCodecContext* ctx, const enum AVPixelFormat* fmts){
-    //     (void)ctx;
-    //     const AVPixelFormat *p;
-    //     for (p = fmts; *p != AV_PIX_FMT_NONE; p++) {
-    //         if (*p == AV_PIX_FMT_D3D11 || *p == AV_PIX_FMT_CUDA)
-    //             return *p;
-    //     }
-    //     return fmts[0];
-    // };
     return 0;
 }
 
@@ -361,24 +343,20 @@ void VideoPlayer::setState(State state) {
     emit stateChanged(this);
 }
 
-void VideoPlayer::free(){
 
 
-        if (_fmtCtx) {
-            avformat_close_input(&_fmtCtx);
-            _fmtCtx = nullptr;
-        }
-
-    while (_hasAudio && !_aCanFree);
-    while (_hasVideo && !_vCanFree);
-    while (!_fmtCtxCanFree){
-        avformat_close_input(&_fmtCtx);
-        _fmtCtxCanFree = false;
-    }
-    _seekTime = -1;
-
-    freeAudio();
-    freeVideo();
+void VideoPlayer::free() {
+    //停止功能能否正常使用
+    // while (_hasAudio && !_aCanFree) SDL_Delay(1); // 等待音频线程结束
+    // while (_hasVideo && !_vCanFree) SDL_Delay(1); // 等待视频线程结束
+    // freeAudio();
+    // freeVideo();
+    // if (_fmtCtx) {
+    //     avformat_close_input(&_fmtCtx);
+    //     _fmtCtx = nullptr;
+    // }
+    // _fmtCtxCanFree = false;
+    // qDebug() << "free 成功" ;
 }
 
 void VideoPlayer::fataError(){

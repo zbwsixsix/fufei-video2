@@ -147,6 +147,15 @@ void VideoPlayer::decodeVideo( double startTime){
         _vPktList.pop_front();
         _vMutex.unlock();
 
+
+        // 检查是否为关键帧
+        if (_vSeekTime >= 0 && !(pkt.flags & AV_PKT_FLAG_KEY)) {
+            qDebug() << "Skipping non-keyframe at _vTime:" << _vTime;
+            av_packet_unref(&pkt);
+            continue; // 丢弃非关键帧，直到找到关键帧
+        }
+
+
         // 视频时钟
         if (pkt.dts != AV_NOPTS_VALUE) {
 
@@ -177,6 +186,7 @@ void VideoPlayer::decodeVideo( double startTime){
                 _vSeekTime=_vSeekTime-startTime;
                 qDebug() << "_vTime是" << _vTime<<"_vSeekTime"<<_vSeekTime;
                 if (_vTime < _vSeekTime) {
+                    qDebug() << "Skipping frame: _vTime" << _vTime << "< _vSeekTime" << _vSeekTime;
                     continue;// 丢掉
                 } else {
                     _vSeekTime = -1;

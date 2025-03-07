@@ -210,12 +210,7 @@ void VideoPlayer::readFile(){
         // 处理seek操作
         if (_seekTime >= 0) {
             qDebug()<< "_seekTime是RRRRRRR"<< _seekTime;
-            int streamIdx;
-            if (_hasAudio) { // 优先使用音频流索引
-                streamIdx = _aStream->index;
-            } else {
-                streamIdx = _vStream->index;
-            }
+          int streamIdx = _hasAudio ? _aStream->index : _vStream->index; // 优先使用音频流
             qDebug()<< "startTime是RRRRRRR"<< startTime;
             qDebug()<< "_seekTime+startTime是RRRRRRR"<< _seekTime+startTime;
             qDebug() << "streamIdx"<<streamIdx;
@@ -233,7 +228,7 @@ void VideoPlayer::readFile(){
             // ret = avformat_seek_file(_fmtCtx, streamIdx, INT64_MIN, ts, INT64_MAX, AVSEEK_FLAG_BACKWARD);
 
             // 修改后的seek逻辑（确保启用FRAME和BACKWARD标志）
-            ret = avformat_seek_file(_fmtCtx,streamIdx , INT64_MIN, ts, INT64_MAX, AVSEEK_FLAG_FRAME );
+           ret = avformat_seek_file(_fmtCtx, streamIdx, INT64_MIN, ts, INT64_MAX, AVSEEK_FLAG_BACKWARD);
 
             if(ret < 0){// seek失败
                 qDebug() << "seek失败" << _seekTime << ts << streamIdx;
@@ -249,10 +244,12 @@ void VideoPlayer::readFile(){
                 // if (_hasAudio) avcodec_flush_buffers(_aDecodeCtx);
                 _vSeekTime = _seekTime;
                 _aSeekTime = _seekTime;
-                _seekTime = -1;
-                // 恢复时钟
+
                 _aTime = 0;
                 _vTime = 0;
+                _seekTime = -1;
+                // 恢复时钟
+
             }
             // if (_hasVideo) avcodec_flush_buffers(_vDecodeCtx);
             // if (_hasAudio) avcodec_flush_buffers(_aDecodeCtx);

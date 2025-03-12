@@ -37,27 +37,29 @@ void VideoWidget::onPlayerFrameDecoded(VideoPlayer *player,uint8_t *data, VideoP
         int h = height();
 
         // 计算rect
-        int dx = 0;
-        int dy = 0;
-        int dw = spec.width;
-        int dh = spec.height;
+        // int dx = 0;
+        // int dy = 0;
+        // int dw = spec.width;
+        // int dh = spec.height;
 
-        // 计算目标尺寸
-        if (dw > w || dh > h) { // 缩放
-            if (dw * h > w * dh) { // 视频的宽高比 > 播放器的宽高比
-                dh = w * dh / dw;
-                dw = w;
-            } else {
-                dw = h * dw / dh;
-                dh = h;
-            }
-        }
+        // // // 计算目标尺寸
+        // if (dw > w || dh > h) { // 缩放
+        //     if (dw * h > w * dh) { // 视频的宽高比 > 播放器的宽高比
+        //         dh = w * dh / dw;
+        //         dw = w;
+        //     } else {
+        //         dw = h * dw / dh;
+        //         dh = h;
+        //     }
+        // }
 
-        // 居中
-        dx = (w - dw) >> 1;
-        dy = (h - dh) >> 1;
+        // // 居中
+        // dx = (w - dw) >> 1;
+        // dy = (h - dh) >> 1;
 
-        _rect = QRect(dx, dy, dw, dh);
+        // _rect = QRect(dx, dy, dw, dh);
+
+         _rect = QRect(0, 0, w, h);
     }
 
     update();//触发paintEvent方法

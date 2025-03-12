@@ -24,6 +24,7 @@ SOURCES += \
     videoplayer_video.cpp \
     videoslider.cpp \
     videowidget.cpp \
+    PolygonSelectionWidget.cpp \
     window1.cpp
 
 HEADERS += \
@@ -32,10 +33,12 @@ HEADERS += \
     videoplayer.h \
     videoslider.h \
     videowidget.h \
+    PolygonSelectionWidget.h \
     window1.h
 
 FORMS += \
     playerwidget.ui \
+    PolygonSelectionWidget.ui \
     window1.ui
 
 # Default rules for deployment.

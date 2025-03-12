@@ -42,6 +42,8 @@ public:
     QHBoxLayout *horizontalLayout_2;
     QPushButton *playBtn;
     QPushButton *stopBtn;
+    QPushButton *selectokbtn;
+    QPushButton *clearareabtn;
     QPushButton *fastBackwardBtn;
     QPushButton *fastForwardBtn;
     QHBoxLayout *horizontalLayout_3;
@@ -110,6 +112,16 @@ public:
         stopBtn->setMaximumSize(QSize(40, 16777215));
 
         horizontalLayout_2->addWidget(stopBtn);
+
+        selectokbtn = new QPushButton(centralwidget);
+        selectokbtn->setObjectName("selectokbtn");
+
+        horizontalLayout_2->addWidget(selectokbtn);
+
+        clearareabtn = new QPushButton(centralwidget);
+        clearareabtn->setObjectName("clearareabtn");
+
+        horizontalLayout_2->addWidget(clearareabtn);
 
         fastBackwardBtn = new QPushButton(centralwidget);
         fastBackwardBtn->setObjectName("fastBackwardBtn");
@@ -221,6 +233,8 @@ public:
         openFileBtn->setText(QCoreApplication::translate("PlayerWidget", "\346\211\223\345\274\200\346\226\207\344\273\266", nullptr));
         playBtn->setText(QCoreApplication::translate("PlayerWidget", "\346\222\255\346\224\276", nullptr));
         stopBtn->setText(QCoreApplication::translate("PlayerWidget", "\345\201\234\346\255\242", nullptr));
+        selectokbtn->setText(QCoreApplication::translate("PlayerWidget", "\351\200\211\346\213\251\345\214\272\345\237\237\345\256\214\346\210\220", nullptr));
+        clearareabtn->setText(QCoreApplication::translate("PlayerWidget", "\346\270\205\347\251\272\345\214\272\345\237\237", nullptr));
         fastBackwardBtn->setText(QCoreApplication::translate("PlayerWidget", "\345\277\253\351\200\20015s", nullptr));
         fastForwardBtn->setText(QCoreApplication::translate("PlayerWidget", "\345\277\253\350\277\23320s", nullptr));
         currentLabel->setText(QCoreApplication::translate("PlayerWidget", "00:00:00", nullptr));

@@ -4,10 +4,10 @@
 #include <QMainWindow>
 #include "videoplayer.h"
 #include "videoslider.h"
-
+#include "PolygonSelectionWidget.h"
 QT_BEGIN_NAMESPACE
 namespace Ui {
-    class PlayerWidget;
+class PlayerWidget;
 }
 QT_END_NAMESPACE
 
@@ -16,7 +16,7 @@ class PlayerWidget : public QMainWindow {
 
 public:
     PlayerWidget(QWidget *parent = nullptr);
-      // VideoPlayer *_player;
+        // VideoPlayer *_player;
     ~PlayerWidget();
 
     VideoPlayer* getPlayer() { return _player; }
@@ -26,7 +26,7 @@ signals:
 
 protected:
     void closeEvent(QCloseEvent *event) override; // 重写关闭事件
-
+    bool eventFilter(QObject *obj, QEvent *event);
 private slots:
     void onPlayerStateChanged(VideoPlayer *player);
     void onPlayerTimeChanged(VideoPlayer *player);
@@ -50,10 +50,14 @@ private slots:
 
     void on_fastForwardBtn_clicked();
 
+
+    void on_selectRegionBtn_clicked();  // 新增：切换区域选择模式的槽函数
+
+
 private:
     Ui::PlayerWidget *ui;
     VideoPlayer *_player;
-
+    PolygonSelectionWidget *_polygonWidget; // 新增：区域选择控件
     QString getTimeText(int value);
 };
 #endif // MAINWINDOW_H

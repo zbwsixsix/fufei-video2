@@ -101,6 +101,20 @@
          </widget>
         </item>
         <item>
+         <widget class="QPushButton" name="selectokbtn">
+          <property name="text">
+           <string>选择区域完成</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="clearareabtn">
+          <property name="text">
+           <string>清空区域</string>
+          </property>
+         </widget>
+        </item>
+        <item>
          <widget class="QPushButton" name="fastBackwardBtn">
           <property name="text">
            <string>快退15s</string>

@@ -11,33 +11,47 @@ PlayerWidget::PlayerWidget(QWidget *parent)
     , ui(new Ui::PlayerWidget) {
     ui->setupUi(this);
 
-    // 注册信号的参数类型，保证能够发出信号
     qRegisterMetaType<VideoPlayer::VideoSwsSpec>("VideoSwsSpec&");
 
-    // 创建播放器
     _player = new VideoPlayer(this);
 
-    // _videoWidget = new VideoWidget(this);
-    // _slider = new VideoSlider(this);
+    connect(_player, &VideoPlayer::stateChanged, this, &PlayerWidget::onPlayerStateChanged);
+    connect(_player, &VideoPlayer::timeChanged, this, &PlayerWidget::onPlayerTimeChanged);
+    connect(_player, &VideoPlayer::initFinished, this, &PlayerWidget::onPlayerInitFinished);
+    connect(_player, &VideoPlayer::playFailed, this, &PlayerWidget::onPlayerPlayFailed);
+    connect(_player, &VideoPlayer::frameDecoded, ui->videoWidget, &VideoWidget::onPlayerFrameDecoded);
+    connect(_player, &VideoPlayer::stateChanged, ui->videoWidget, &VideoWidget::onPlayerStateChanged);
 
+    connect(ui->currentSlider, &VideoSlider::clicked, this, &PlayerWidget::onSliderClicked);
 
-    connect(_player, &VideoPlayer::stateChanged,this, &PlayerWidget::onPlayerStateChanged);
-    connect(_player, &VideoPlayer::timeChanged,this, &PlayerWidget::onPlayerTimeChanged);
-    connect(_player, &VideoPlayer::initFinished,this, &PlayerWidget::onPlayerInitFinished);
-    connect(_player, &VideoPlayer::playFailed,this, &PlayerWidget::onPlayerPlayFailed);
-    connect(_player, &VideoPlayer::frameDecoded,ui->videoWidget, &VideoWidget::onPlayerFrameDecoded);
-    connect(_player, &VideoPlayer::stateChanged,ui->videoWidget, &VideoWidget::onPlayerStateChanged);
-
-
-    // 监听时间滑块的点击
-    connect(ui->currentSlider, &VideoSlider::clicked,
-                this, &PlayerWidget::onSliderClicked);
-
-    // 设置音量滑块的范围
-    ui->volumnSlider->setRange(VideoPlayer::Volumn::Min,VideoPlayer::Volumn::Max);
+    ui->volumnSlider->setRange(VideoPlayer::Volumn::Min, VideoPlayer::Volumn::Max);
     ui->volumnSlider->setValue(ui->volumnSlider->maximum() >> 2);
+
+    // 初始化 PolygonSelectionWidget
+    _polygonWidget = new PolygonSelectionWidget(ui->videoWidget);
+    _polygonWidget->setGeometry(0, 0, ui->videoWidget->width(), ui->videoWidget->height()); // 初始化时使用 videoWidget 大小
+    _polygonWidget->setStyleSheet("background-color: rgba(0, 255, 0, 50);"); // 半透绿色背景
+
+
+    // _polygonWidget->hide(); // 默认隐藏
+    _polygonWidget->setEnabled(true);
+    _polygonWidget->setAttribute(Qt::WA_TransparentForMouseEvents, false); // 确保不透传鼠标事件
+    _polygonWidget->setFocusPolicy(Qt::StrongFocus); // 确保可以获得焦点
+
+    connect(ui->selectokbtn, &QPushButton::clicked, _polygonWidget, &PolygonSelectionWidget::savePoints);
+    connect(ui->clearareabtn, &QPushButton::clicked,  _polygonWidget, &PolygonSelectionWidget::clearPoints);
+    // 动态调整大小（需要重写 resizeEvent 或使用事件过滤器）
+    ui->videoWidget->installEventFilter(this); // 安装事件过滤器
 }
 
+// 添加事件过滤器
+bool PlayerWidget::eventFilter(QObject *obj, QEvent *event) {
+    if (obj == ui->videoWidget && event->type() == QEvent::Resize) {
+        _polygonWidget->setGeometry(0, 0, ui->videoWidget->width(), ui->videoWidget->height());
+        qDebug() << "Video widget resized, new geometry:" << _polygonWidget->geometry();
+    }
+    return QMainWindow::eventFilter(obj, event);
+}
 PlayerWidget::~PlayerWidget() {
     delete ui;
     delete _player;
@@ -92,6 +106,7 @@ void PlayerWidget::onPlayerStateChanged(VideoPlayer *player) {
         ui->currentSlider->setEnabled(false);
         ui->volumnSlider->setEnabled(false);
         ui->muteBtn->setEnabled(false);
+        ui->selectokbtn->setEnabled(false);
 
         ui->durationLabel->setText(getTimeText(0));
         ui->currentSlider->setValue(0);
@@ -104,6 +119,8 @@ void PlayerWidget::onPlayerStateChanged(VideoPlayer *player) {
         ui->currentSlider->setEnabled(true);
         ui->muteBtn->setEnabled(true);
         ui->volumnSlider->setEnabled(true);
+
+        ui->selectokbtn->setEnabled(true); // 新增按钮启用
         // 显示播放视频的页面
         ui->playWidget->setCurrentWidget(ui->videoPage);
     }
@@ -185,3 +202,22 @@ void PlayerWidget::on_fastForwardBtn_clicked()
     _player->setTime(currentTime + 20); // 快进10秒
 }
 
+void PlayerWidget::on_selectRegionBtn_clicked() {
+
+    qDebug() << "_polygonWidget->isVisible()打开文件" << _polygonWidget->isVisible();
+    if (_polygonWidget->isVisible()) {
+        // 如果多边形选择控件已显示，则隐藏它并恢复播放
+        _polygonWidget->hide();
+        ui->selectokbtn->setText("开始选择区域");
+        if (_player->getState() == VideoPlayer::Paused) {
+            _player->play(); // 如果之前是暂停状态，则恢复播放
+        }
+    } else {
+        // 显示多边形选择控件并暂停视频
+        _polygonWidget->show();
+        ui->selectokbtn->setText("退出选择区域");
+        if (_player->getState() == VideoPlayer::Playing) {
+            _player->pause(); // 暂停视频以便选择区域
+        }
+    }
+}

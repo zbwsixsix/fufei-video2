@@ -43,14 +43,13 @@ int VideoPlayer::initSws(){
         return -1;
     }
 
+    // 明确设置颜色范围
+    int srcRange = (_vDecodeCtx->pix_fmt == AV_PIX_FMT_YUVJ420P) ? 1 : 0; // 输入为 JPEG 范围 (0-255)
+    int dstRange = 1; // 输出 RGBA 使用 0-255 范围
     sws_setColorspaceDetails(_vSwsCtx,
-                             sws_getCoefficients(SWS_CS_DEFAULT), // 输入色彩空间
-                             0, // 输入范围 (0-255)
-                             sws_getCoefficients(SWS_CS_ITU709), // 输出色彩空间
-                             1, // 输出范围 (JPEG范围)
-                             0, 1 << 16, 1 << 16
-                             );
-
+                             sws_getCoefficients(SWS_CS_DEFAULT), srcRange,
+                             sws_getCoefficients(SWS_CS_ITU709), dstRange,
+                             0, 1 << 16, 1 << 16);
 
     // 初始化像素格式转换的输入frame
     _vSwsInFrame = av_frame_alloc();

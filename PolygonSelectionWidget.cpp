@@ -13,38 +13,36 @@ PolygonSelectionWidget::PolygonSelectionWidget(QWidget *parent)
     : QWidget(parent), ui(new Ui::PolygonWidget)
 {
     ui->setupUi(this);
+    // 初始化分辨率为默认值
+    videoResolution = QSize(0, 0);
+}
 
-    // 检查按钮是否为空
-    if (!ui->clearbtn) qDebug() << "Clear button is null!";
-    if (!ui->savebtn) qDebug() << "Save button is null!";
+void PolygonSelectionWidget::setVideoRect(const QRect& rect) {
+    videoRect = rect;
+}
 
-    // 连接信号与槽
-    bool clearConnected = connect(ui->clearbtn, &QPushButton::clicked, this, &PolygonSelectionWidget::clearPoints);
-    bool saveConnected = connect(ui->savebtn, &QPushButton::clicked, this, &PolygonSelectionWidget::savePoints);
-    qDebug() << "Clear button connected:" << clearConnected;
-    qDebug() << "Save button connected:" << saveConnected;
-
-    // 初始化提示标签（可选）
-    // hintLabel = new QLabel(this);
-    // hintLabel->setText("当前点数: 0");
-
-    // 初始化 UI 中的 label
-    ui->label->setText("当前点数: 0"); // 默认显示点数为 0
+// 新增：实现设置视频分辨率的方法
+void PolygonSelectionWidget::setVideoResolution(const QSize& resolution) {
+    videoResolution = resolution;
+    qDebug() << "Video resolution set to:" << resolution.width() << "x" << resolution.height();
 }
 
 void PolygonSelectionWidget::mousePressEvent(QMouseEvent *event)
 {
+    if (!videoRect.contains(event->pos())) {
+        qDebug() << "Click outside video area: " << event->pos() << ", videoRect: " << videoRect;
+        return;
+    }
+
     qDebug() << "PolygonSelectionWidget mousePressEvent: " << event->pos();
     if (event->button() == Qt::LeftButton) {
         points.append(event->pos());
         update();
-        ui->label->setText(QString("当前点数: %1").arg(points.size())); // 更新点数
     } else if (event->button() == Qt::RightButton && !points.isEmpty()) {
         points.removeLast();
         update();
-        ui->label->setText(QString("当前点数: %1").arg(points.size())); // 更新点数
     }
-    QWidget::mousePressEvent(event); // 调用基类的鼠标事件处理函数
+    QWidget::mousePressEvent(event);
 }
 
 void PolygonSelectionWidget::paintEvent(QPaintEvent *event)
@@ -53,14 +51,13 @@ void PolygonSelectionWidget::paintEvent(QPaintEvent *event)
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing);
 
-    // 绘制点
-    painter.setPen(Qt::red);
-    painter.setBrush(Qt::red);
-    foreach (const QPoint &point, points) {
-        painter.drawEllipse(point, 3, 3);
+    if (points.size() >= 3) {
+        painter.setPen(Qt::blue);
+        painter.setBrush(QColor(255, 255, 255, 70));
+        QPolygon polygon(points);
+        painter.drawPolygon(polygon);
     }
 
-    // 绘制多边形
     painter.setPen(Qt::blue);
     painter.setBrush(Qt::NoBrush);
     if (points.size() >= 2) {
@@ -71,6 +68,12 @@ void PolygonSelectionWidget::paintEvent(QPaintEvent *event)
             painter.drawLine(points.last(), points.first());
         }
     }
+
+    painter.setPen(Qt::red);
+    painter.setBrush(Qt::red);
+    foreach (const QPoint &point, points) {
+        painter.drawEllipse(point, 3, 3);
+    }
 }
 
 void PolygonSelectionWidget::clearPoints()
@@ -78,7 +81,6 @@ void PolygonSelectionWidget::clearPoints()
     qDebug() << "Clear button clicked! Call stack:" << Q_FUNC_INFO;
     points.clear();
     update();
-    ui->label->setText("当前点数: 0"); // 重置点数显示
 }
 
 void PolygonSelectionWidget::savePoints()
@@ -86,25 +88,46 @@ void PolygonSelectionWidget::savePoints()
     qDebug() << "Save button clicked!";
     qDebug() << "Current working directory:" << QDir::currentPath();
 
-    // 获取窗口尺寸
-    double windowWidth = width();
-    double windowHeight = height();
+    // 获取视频区域的尺寸
+    double videoWidth = videoRect.width();
+    double videoHeight = videoRect.height();
+
+    if (videoWidth <= 0 || videoHeight <= 0) {
+        qDebug() << "videoRect is invalid, falling back to widget size: " << videoRect;
+        videoWidth = width();
+        videoHeight = height();
+    }
+
+    // 检查分辨率是否有效
+    if (videoResolution.width() <= 0 || videoResolution.height() <= 0) {
+        qDebug() << "Invalid video resolution, cannot save points as pixel coordinates";
+        return;
+    }
 
     QFile file("points_percent.txt");
     if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
         QTextStream out(&file);
         for (const QPoint &point : points) {
+            // 计算相对于 videoRect 左上角的坐标
+            double relativeX = point.x() - videoRect.x();
+            double relativeY = point.y() - videoRect.y();
+
             // 计算百分比
-            double xPercent = (point.x() / windowWidth) * 100.0;
-            double yPercent = (point.y() / windowHeight) * 100.0;
-            // 写入百分比坐标，保留两位小数
-            out << QString::number(xPercent, 'f', 2) << "%," << QString::number(yPercent, 'f', 2) << "%\n";
+            double xPercent = (relativeX / videoWidth) * 100.0;
+            double yPercent = (relativeY / videoHeight) * 100.0;
+
+            // 将百分比转换为像素坐标（乘以视频分辨率）
+            double pixelX = (xPercent / 100.0) * videoResolution.width();
+            double pixelY = (yPercent / 100.0) * videoResolution.height();
+
+            qDebug() <<"视频像素分辨率"<<videoResolution.width()<< videoResolution.height();
+
+            // 写入像素坐标，保留两位小数
+            out << QString::number(pixelX, 'f', 2) << "," << QString::number(pixelY, 'f', 2) << "\n";
         }
         file.close();
-        qDebug() << "Points saved to points_percent.txt";
-        ui->label->setText("保存完成"); // 显示保存成功的提示
+        qDebug() << "Points saved to points_percent.txt as pixel coordinates";
     } else {
         qDebug() << "Failed to open file for writing:" << file.errorString();
-        ui->label->setText("保存失败"); // 显示保存失败的提示
     }
 }

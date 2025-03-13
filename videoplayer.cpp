@@ -149,6 +149,14 @@ bool VideoPlayer::isMute() {
     return _mute;
 }
 
+// 新增：实现 getResolution 方法
+QSize VideoPlayer::getResolution() const {
+    if (_vDecodeCtx) {
+        return QSize(_vDecodeCtx->width, _vDecodeCtx->height);
+    }
+    return QSize(0, 0); // 如果视频未初始化，返回无效分辨率
+}
+
 void VideoPlayer::readFile(){
 
     freeAudio();

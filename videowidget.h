@@ -14,6 +14,9 @@ public:
     explicit VideoWidget(QWidget *parent = nullptr);
     ~VideoWidget();
 
+    // 新增：获取视频内容的绘制区域
+    QRect getVideoRect() const { return _rect; }
+
 public slots:
     void onPlayerFrameDecoded(VideoPlayer *player, uint8_t *data, VideoPlayer::VideoSwsSpec &spec);
     void onPlayerStateChanged(VideoPlayer *player);

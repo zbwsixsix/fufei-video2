@@ -5,6 +5,8 @@
 #include "videoplayer.h"
 #include "videoslider.h"
 #include "PolygonSelectionWidget.h"
+#include <QSize> // 新增：用于存储分辨率
+
 QT_BEGIN_NAMESPACE
 namespace Ui {
 class PlayerWidget;
@@ -16,48 +18,40 @@ class PlayerWidget : public QMainWindow {
 
 public:
     PlayerWidget(QWidget *parent = nullptr);
-        // VideoPlayer *_player;
     ~PlayerWidget();
 
     VideoPlayer* getPlayer() { return _player; }
 
 signals:
-    void windowClosed(PlayerWidget *widget); // 新增信号，表示窗口关闭
+    void windowClosed(PlayerWidget *widget);
 
 protected:
-    void closeEvent(QCloseEvent *event) override; // 重写关闭事件
+    void closeEvent(QCloseEvent *event) override;
     bool eventFilter(QObject *obj, QEvent *event);
+
 private slots:
     void onPlayerStateChanged(VideoPlayer *player);
     void onPlayerTimeChanged(VideoPlayer *player);
     void onPlayerInitFinished(VideoPlayer *player);
     void onPlayerPlayFailed();
     void onSliderClicked(VideoSlider *slider);
+    void onVideoFrameDecoded(VideoPlayer *player, uint8_t *data, VideoPlayer::VideoSwsSpec &spec);
 
     void on_stopBtn_clicked();
-
     void on_openFileBtn_clicked();
-
     void on_currentSlider_valueChanged(int value);
-
     void on_volumnSlider_valueChanged(int value);
-
     void on_playBtn_clicked();
-
     void on_muteBtn_clicked();
-
     void on_fastBackwardBtn_clicked();
-
     void on_fastForwardBtn_clicked();
-
-
-    void on_selectRegionBtn_clicked();  // 新增：切换区域选择模式的槽函数
-
 
 private:
     Ui::PlayerWidget *ui;
     VideoPlayer *_player;
-    PolygonSelectionWidget *_polygonWidget; // 新增：区域选择控件
+    PolygonSelectionWidget *_polygonWidget;
+    QSize _videoResolution; // 新增：存储视频分辨率
     QString getTimeText(int value);
 };
+
 #endif // MAINWINDOW_H

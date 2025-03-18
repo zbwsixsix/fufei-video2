@@ -62,7 +62,7 @@ public:
     {
         if (PlayerWidget->objectName().isEmpty())
             PlayerWidget->setObjectName("PlayerWidget");
-        PlayerWidget->resize(922, 658);
+        PlayerWidget->resize(1128, 658);
         centralwidget = new QWidget(PlayerWidget);
         centralwidget->setObjectName("centralwidget");
         verticalLayout = new QVBoxLayout(centralwidget);
@@ -213,7 +213,7 @@ public:
         PlayerWidget->setCentralWidget(centralwidget);
         menubar = new QMenuBar(PlayerWidget);
         menubar->setObjectName("menubar");
-        menubar->setGeometry(QRect(0, 0, 922, 25));
+        menubar->setGeometry(QRect(0, 0, 1128, 25));
         PlayerWidget->setMenuBar(menubar);
         statusbar = new QStatusBar(PlayerWidget);
         statusbar->setObjectName("statusbar");

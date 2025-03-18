@@ -5,7 +5,7 @@
 #include <QVector>
 #include <QPoint>
 #include <QLabel>
-#include <QSize> // 新增：用于接收分辨率
+#include <QSize>
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -21,7 +21,6 @@ public:
     void clearPoints();
     void savePoints();
     void setVideoRect(const QRect& rect);
-    // 新增：设置视频分辨率
     void setVideoResolution(const QSize& resolution);
 
 protected:
@@ -32,8 +31,8 @@ private:
     Ui::PolygonWidget *ui;
     QVector<QPoint> points;
     QRect videoRect;
-    // 新增：存储视频分辨率
     QSize videoResolution;
+    QVector<QPoint> computeConvexHull(const QVector<QPoint>& points) const; // 计算凸包
 };
 
 #endif // POLYGONSELECTIONWIDGET_H

@@ -9,6 +9,7 @@
 #include <QDebug>
 #include <QDir>
 #include <algorithm> // 用于 std::sort
+#include <QMessageBox>
 
 PolygonSelectionWidget::PolygonSelectionWidget(QWidget *parent)
     : QWidget(parent), ui(new Ui::PolygonWidget)
@@ -42,6 +43,7 @@ void PolygonSelectionWidget::mousePressEvent(QMouseEvent *event)
             QPolygon polygon(convexHull);
             if (polygon.containsPoint(event->pos(), Qt::OddEvenFill)) {
                 qDebug() << "Point inside polygon, not added.";
+                QMessageBox::information(this, "提示", "新点在已有区域内，无法添加！");
                 return; // 点在多边形内，拒绝添加
             }
         }
@@ -109,13 +111,15 @@ void PolygonSelectionWidget::paintEvent(QPaintEvent *event)
     // 计算凸包
     QVector<QPoint> convexHull = computeConvexHull(points);
 
+    // 绘制凸包区域
     if (convexHull.size() >= 3) {
         painter.setPen(Qt::blue);
-        painter.setBrush(QColor(255, 255, 255, 70));
+        painter.setBrush(QColor(255, 255, 255, 70)); // 半透明填充
         QPolygon polygon(convexHull);
         painter.drawPolygon(polygon);
     }
 
+    // 绘制凸包边线
     painter.setPen(Qt::blue);
     painter.setBrush(Qt::NoBrush);
     if (convexHull.size() >= 2) {
@@ -127,12 +131,14 @@ void PolygonSelectionWidget::paintEvent(QPaintEvent *event)
         }
     }
 
+    // 只绘制凸包中的点
     painter.setPen(Qt::red);
     painter.setBrush(Qt::red);
-    foreach (const QPoint &point, points) { // 绘制所有原始点
-        painter.drawEllipse(point, 3, 3);
+    foreach (const QPoint &point, convexHull) {
+        painter.drawEllipse(point, 3, 3); // 绘制凸包顶点为红色小圆点
     }
 }
+
 
 void PolygonSelectionWidget::clearPoints()
 {
@@ -157,6 +163,7 @@ void PolygonSelectionWidget::savePoints()
 
     if (videoResolution.width() <= 0 || videoResolution.height() <= 0) {
         qDebug() << "Invalid video resolution, cannot save points as pixel coordinates";
+        QMessageBox::warning(this, "提示", "视频分辨率无效，无法保存点！"); // 添加失败提示
         return;
     }
 
@@ -180,8 +187,10 @@ void PolygonSelectionWidget::savePoints()
             out << QString::number(pixelX, 'f', 2) << "," << QString::number(pixelY, 'f', 2) << "\n";
         }
         file.close();
+        QMessageBox::information(this, "提示", "区域点已成功保存到 points_percent.txt！"); // 添加成功提示
         qDebug() << "Convex hull points saved to points_percent.txt as pixel coordinates";
     } else {
         qDebug() << "Failed to open file for writing:" << file.errorString();
+        QMessageBox::warning(this, "提示", "无法保存点，文件打开失败！"); // 添加失败提示
     }
 }

@@ -30,7 +30,7 @@ PlayerWidget::PlayerWidget(QWidget *parent)
 
     _polygonWidget = new PolygonSelectionWidget(ui->videoWidget);
     _polygonWidget->setGeometry(0, 0, ui->videoWidget->width(), ui->videoWidget->height());
-    _polygonWidget->setStyleSheet("background-color: rgba(0, 255, 0, 50);");
+    _polygonWidget->setStyleSheet("background-color: rgba(255, 255, 255, 255);");
 
     _polygonWidget->setVideoRect(ui->videoWidget->rect());
 

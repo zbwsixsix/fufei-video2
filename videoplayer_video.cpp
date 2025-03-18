@@ -163,6 +163,7 @@ void VideoPlayer::decodeVideo( double startTime){
             // qDebug() << "_vTime" << _vTime << "startTime" << startTime ;
 
             _vTime=_vTime-startTime;
+            emit timeChanged(this); // 添加这一行，通知时间变化
         }
 
         // 发送压缩数据到解码器

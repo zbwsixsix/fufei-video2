@@ -1,25 +1,25 @@
 ﻿#include "videoplayer.h"
 // 初始化音频信息
 int VideoPlayer::initAudioInfo() {
-    int ret = initDecoder(&_aDecodeCtx,&_aStream,AVMEDIA_TYPE_AUDIO);
-    RET(initDecoder);
+    int ret = initDecoder(&_aDecodeCtx, &_aStream, AVMEDIA_TYPE_AUDIO);
+    if (ret < 0) {
+        qDebug() << "No audio stream available in the file";
+        _aDecodeCtx = nullptr; // 确保指针为空
+        _aStream = nullptr;
+        return -1; // 返回失败但不触发致命错误
+    }
 
-    // 初始化音频重采样
     ret = initSwr();
     RET(initSwr);
 
-    // 初始化SDL
     ret = initSDL();
     RET(initSDL);
 
-
-    // 获取视频的起始时间并存储到 startTime
     if (_fmtCtx) {
-        startTime = static_cast<double>(_fmtCtx->start_time) / AV_TIME_BASE;  // 转换为秒
+        startTime = static_cast<double>(_fmtCtx->start_time) / AV_TIME_BASE;
     }
     return 0;
 }
-
 int VideoPlayer::initSwr() {
     // 重采样输入参数
     _aSwrInSpec.sampleFmt = _aDecodeCtx->sample_fmt;
@@ -169,6 +169,11 @@ void VideoPlayer::clearAudioPktList(){
 
 void VideoPlayer::sdlAudioCallback(Uint8 *stream, int len,double startTime){
     // qDebug() << "sdlAudioCallback called for device" << _audioDeviceId << "len:" << len;
+
+    // if (!_hasAudio || !_aDecodeCtx) {
+    //     SDL_memset(stream, 0, len); // 无音频时填充静音
+    //     return;
+    // }
     SDL_memset(stream, 0, len);
     // 清零（静音）
 
